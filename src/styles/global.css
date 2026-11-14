@@ -675,3 +675,19 @@ h1 { margin: 0; color: var(--ink); font-size: clamp(28px, 3vw, 37px); font-weigh
   .project-print-page { width: 100%; max-width: none; margin: 0; }
   .project-report { width: 100%; margin: 0 auto; }
 }
+
+/* Master Harga group actions */
+.budget-card-actions .formula-danger-button {
+  min-height: 36px;
+  padding: 0 13px;
+  border: 1px solid #B42318;
+  border-radius: 7px;
+  background: #B42318;
+  color: #FFF;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.budget-card-actions .formula-danger-button:hover:not(:disabled) { background: #912018; border-color: #912018; }
+.budget-card-actions .formula-danger-button:disabled { opacity: .55; cursor: not-allowed; }
