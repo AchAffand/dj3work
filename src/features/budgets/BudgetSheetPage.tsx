@@ -70,8 +70,18 @@ export function BudgetSheetPage() {
       return;
     }
     if (priceDraft.expression.trim()) {
-      const validation = validateBudgetPriceFormula(priceDraft.expression, []);
-      if (validation.error) { setMessage(validation.error); return; }
+      try {
+        const variables = Object.fromEntries(detail.components.flatMap((component) => detail.variants.flatMap((variant) => {
+          const price = component.prices[variant.key];
+          const value = price?.amount ?? (price?.expression ? calculateExpression(price.expression, {}) : null);
+          return value === null ? [] : [["price_" + component.key + "_" + variant.key, value] as const];
+        })));
+        const validation = validateBudgetPriceFormula(priceDraft.expression, Object.entries(variables).map(([key, value]) => ({ key, value })));
+        if (validation.error) { setMessage(validation.error); return; }
+      } catch (cause) {
+        setMessage(cause instanceof Error ? cause.message : "Rumus harga tidak valid.");
+        return;
+      }
     }
     setSaving(true);
     setMessage(null);
