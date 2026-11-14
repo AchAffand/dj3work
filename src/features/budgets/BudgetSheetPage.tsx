@@ -5,6 +5,7 @@ import { formatRupiah } from "../../app/format";
 import { useAppServices } from "../../app/AppServices";
 import type { BudgetCatalog, BudgetCatalogDetail, BudgetComponent } from "../../domain/budgets/types";
 import { validateBudgetPriceFormula } from "../../domain/budgets/priceFormula";
+import { calculateExpression } from "../../domain/formulas/evaluate";
 
 type ComponentDraft = { id?: string; key?: string; label: string; unit: string; groupLabel: string };
 type PriceDraft = { componentId: string; variantKey: string; amount: string; expression: string };
