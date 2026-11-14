@@ -1,0 +1,23 @@
+node_modules/
+dist/
+.npm-cache/
+.env
+.env.*
+!.env.example
+supabase/.temp/
+.verify-run-temp/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Local temporary files
+.superpowers/
+outputs/
+
+# Reference files and local working documents
+*.dwg
+*.xlsx
+*.jpeg
+*.jpg
+*.png
