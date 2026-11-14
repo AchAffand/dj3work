@@ -1,9 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AppPageState } from "../../app/AppPageState";
 import { formatRupiah } from "../../app/format";
 import { useAppServices } from "../../app/AppServices";
-import { useAuth } from "../../auth/AuthProvider";
 import type { BudgetCatalog, BudgetCatalogDetail, BudgetComponent } from "../../domain/budgets/types";
 import { validateBudgetPriceFormula } from "../../domain/budgets/priceFormula";
 
@@ -15,7 +14,6 @@ const finishOf = (label: string) => label.includes(" · ") ? label.split(" · ")
 
 export function BudgetSheetPage() {
   const { repository, isCatalogAdmin, reloadBudgets } = useAppServices();
-  const { user } = useAuth();
   const { catalogSlug = "" } = useParams();
   const navigate = useNavigate();
   const [detail, setDetail] = useState<BudgetCatalogDetail | null>(null);
@@ -205,7 +203,7 @@ export function BudgetSheetPage() {
           </thead>
           <tbody>
             {sections.map(([section, components]) => (
-              <tbody key={section}>
+              <Fragment key={section}>
                 <tr className="budget-sheet-section-row">
                   <td colSpan={3 + detail.variants.length + (isCatalogAdmin ? 1 : 0)}>{section}</td>
                 </tr>
@@ -235,7 +233,7 @@ export function BudgetSheetPage() {
                     {isCatalogAdmin && <td className="sheet-action-cell"><button type="button" title="Keluarkan item" aria-label={`Hapus ${component.label}`} disabled={saving} onClick={() => setDeleteTarget(component)}>&times;</button></td>}
                   </tr>
                 ))}
-              </tbody>
+              </Fragment>
             ))}
           </tbody>
         </table>
