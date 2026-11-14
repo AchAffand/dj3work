@@ -9,62 +9,45 @@ export function BudgetWorkspacePage() {
   const navigate = useNavigate();
   const [catalogs, setCatalogs] = useState<BudgetCatalog[]>([]);
   const [loading, setLoading] = useState(true);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
   const load = useCallback(async () => {
     if (!repository) { setLoading(false); return; }
-    setLoading(true); setError(null);
+    setLoading(true);
+    setError(null);
     try {
-      setCatalogs(await repository.listBudgetCatalogs());
+      const sheets = await repository.listBudgetCatalogs();
+      setCatalogs(sheets.sort((a, b) => a.position - b.position));
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Master harga belum dapat dimuat.");
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+    }
   }, [repository]);
+
   useEffect(() => { void load(); }, [load]);
 
-  const deleteGroup = async (catalog: BudgetCatalog) => {
-    if (!repository || deletingId) return;
-    const confirmed = window.confirm(
-      `Hapus kelompok "${catalog.label}" secara permanen? Seluruh item dan harga di dalamnya juga akan dihapus. Tindakan ini tidak dapat dibatalkan.`,
-    );
-    if (!confirmed) return;
-    setDeletingId(catalog.id); setError(null);
-    try {
-      await repository.deleteBudgetCatalog(catalog.id);
-      setCatalogs((current) => current.filter((item) => item.id !== catalog.id));
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Kelompok gagal dihapus.");
-    } finally { setDeletingId(null); }
-  };
+  if (loading) return <AppPageState title="Memuat Master Harga" detail="Membuka empat lembar workbook." />;
+  if (error) return <AppPageState title="Master Harga belum dapat dimuat" detail={error} tone="error" actionLabel="Coba lagi" onAction={() => void load()} />;
 
-  if (loading) return <AppPageState title="Memuat Master Harga" detail="Katalog dan perkiraan sedang dibuka." />;
-  if (error && catalogs.length === 0) return <AppPageState title="Master Harga belum dapat dimuat" detail={error} tone="error" actionLabel="Coba lagi" onAction={() => void load()} />;
-
-  return <section className="page-content">
-    <div className="page-heading-row">
-      <div className="page-intro">
-        <p className="eyebrow">ANGGARAN KUSEN</p>
-        <h1>Master Harga</h1>
-        <p className="page-description">Kelola kelompok harga dan item berdasarkan workbook Master Budget Kusen 2026.</p>
+  return (
+    <section className="page-content budget-workbook-home">
+      <div className="page-heading-row">
+        <div className="page-intro">
+          <p className="eyebrow">WORKBOOK · MASTER BUDGET KUSEN 2026</p>
+          <h1>Master Harga</h1>
+          <p className="page-description">Pilih salah satu lembar, seperti berpindah sheet di Excel.</p>
+        </div>
       </div>
-    </div>
-    {error && <p className="form-error" role="alert">{error}</p>}
-    <div className="budget-catalog-grid">
-      {catalogs.map((catalog) => <article className="budget-catalog-card" key={catalog.id}>
-        <div>
-          <p className="eyebrow">KELOMPOK {String(catalog.position).padStart(2, "0")}</p>
-          <h2>{catalog.label}</h2>
-          <p>Kelola daftar item dan harga pada kelompok ini.</p>
-        </div>
-        <div className="budget-card-actions">
-          <button className="secondary-button" type="button" onClick={() => navigate(`/master-harga/${catalog.slug}?mode=items`)}>
-            Kelola Item
+      <div className="budget-workbook-list">
+        {catalogs.map((catalog, index) => (
+          <button className="budget-workbook-tab-card" key={catalog.id} type="button" onClick={() => navigate(`/master-harga/${catalog.slug}`)}>
+            <span className="budget-workbook-index">{String(index + 1).padStart(2, "0")}</span>
+            <span className="budget-workbook-name">{catalog.label}</span>
+            <span className="budget-workbook-open">Buka lembar <span aria-hidden="true">↗</span></span>
           </button>
-          <button className="formula-danger-button" type="button" disabled={deletingId !== null} onClick={() => void deleteGroup(catalog)}>
-            {deletingId === catalog.id ? "Menghapus..." : "Hapus Kelompok"}
-          </button>
-        </div>
-      </article>)}
-    </div>
-  </section>;
+        ))}
+      </div>
+    </section>
+  );
 }
