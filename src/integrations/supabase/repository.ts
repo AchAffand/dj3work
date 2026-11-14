@@ -344,6 +344,11 @@ export function createSupabaseRepository(client: SupabaseClient) {
       return mapped;
     },
 
+    async deleteBudgetCatalog(catalogId: string): Promise<void> {
+      const { error } = await client.rpc("delete_budget_catalog", { p_catalog_id: catalogId });
+      throwIfError(error);
+    },
+
     async saveBudgetMaterialMapping(catalogId: string, materialKey: string, materialName: string, materialUnit: string, componentId: string | null): Promise<void> {
       const { error } = await client.rpc("save_budget_material_mapping", { p_catalog_id: catalogId, p_material_key: materialKey, p_material_name: materialName, p_material_unit: materialUnit, p_component_id: componentId });
       throwIfError(error);
