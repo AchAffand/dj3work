@@ -691,3 +691,53 @@ h1 { margin: 0; color: var(--ink); font-size: clamp(28px, 3vw, 37px); font-weigh
 }
 .budget-card-actions .formula-danger-button:hover:not(:disabled) { background: #912018; border-color: #912018; }
 .budget-card-actions .formula-danger-button:disabled { opacity: .55; cursor: not-allowed; }
+
+
+/* Master Harga workbook / spreadsheet presentation */
+.budget-workbook-list { display: grid; gap: 10px; max-width: 760px; }
+.budget-workbook-tab-card { display: grid; grid-template-columns: 42px minmax(0,1fr) auto; min-height: 68px; align-items: center; gap: 14px; padding: 12px 17px; border: 1px solid #DCDCDC; border-radius: 8px; background: #FFF; color: var(--ink); cursor: pointer; text-align: left; transition: border-color .15s, background .15s; }
+.budget-workbook-tab-card:hover { border-color: #999; background: #FAFAFA; }
+.budget-workbook-index { color: #999; font-family: ui-monospace, monospace; font-size: 11px; }
+.budget-workbook-name { font-size: 14px; font-weight: 700; }
+.budget-workbook-open { color: #777; font-size: 10px; white-space: nowrap; }
+.budget-sheet-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+.budget-sheet-heading .page-description { margin-top: 7px; }
+.budget-sheet-tabs { display: flex; gap: 3px; overflow-x: auto; margin-bottom: 0; padding: 0 4px; border-bottom: 1px solid #BDBDBD; }
+.budget-sheet-tabs button { min-height: 37px; padding: 0 17px; border: 1px solid transparent; border-bottom: 0; border-radius: 7px 7px 0 0; background: #EDEDED; color: #555; cursor: pointer; font-size: 11px; white-space: nowrap; }
+.budget-sheet-tabs button:hover { background: #E3E3E3; }
+.budget-sheet-tabs button.active { position: relative; margin-bottom: -1px; border-color: #BDBDBD; background: #FFF; color: #222; font-weight: 750; }
+.budget-sheet-meta { display: flex; gap: 18px; padding: 10px 12px; border: 1px solid #C8C8C8; border-top: 0; background: #F7F7F7; color: #777; font-size: 9px; }
+.budget-sheet-meta span + span { padding-left: 18px; border-left: 1px solid #DDD; }
+.budget-sheet-scroll { overflow: auto; max-width: 100%; border: 1px solid #AFAFAF; border-top: 0; background: #FFF; }
+.budget-sheet-table { width: max-content; min-width: 100%; border-collapse: collapse; color: #242424; font-size: 10px; }
+.budget-sheet-table th, .budget-sheet-table td { min-width: 100px; height: 34px; padding: 5px 8px; border: 1px solid #D2D2D2; vertical-align: middle; }
+.budget-sheet-table thead th { position: sticky; top: 0; z-index: 1; background: #E8E8E8; color: #333; font-size: 9px; font-weight: 750; text-align: center; white-space: nowrap; }
+.budget-sheet-table .budget-sheet-brand-row th { background: #DCDCDC; }
+.budget-sheet-table .sheet-number-col { min-width: 46px; width: 46px; }
+.budget-sheet-table .sheet-item-col { min-width: 250px; }
+.budget-sheet-table .sheet-unit-col { min-width: 72px; }
+.budget-sheet-table .sheet-action-col { min-width: 52px; width: 52px; }
+.budget-sheet-table tbody tr:nth-child(even):not(.budget-sheet-section-row) { background: #FAFAFA; }
+.budget-sheet-table tbody tr:hover:not(.budget-sheet-section-row) { background: #F1F5F2; }
+.budget-sheet-table .budget-sheet-section-row td { height: 29px; background: #DDE6DF; color: #34463A; font-size: 9px; font-weight: 800; letter-spacing: .04em; }
+.budget-sheet-table .sheet-number-cell, .budget-sheet-table .sheet-unit-cell { color: #777; text-align: center; }
+.budget-sheet-item-link { display: block; width: 100%; padding: 3px 0; border: 0; background: transparent; color: #252525; cursor: pointer; font: inherit; text-align: left; }
+.budget-sheet-item-link:hover { color: #17633B; text-decoration: underline; }
+.budget-sheet-table .sheet-price-cell { min-width: 126px; padding: 0; text-align: right; }
+.budget-sheet-table .sheet-price-cell button { width: 100%; min-height: 33px; padding: 5px 9px; border: 0; background: transparent; color: #333; cursor: cell; font: inherit; font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.budget-sheet-table .sheet-price-cell button:hover:not(:disabled) { outline: 2px solid #54856A; outline-offset: -2px; background: #F1F8F3; }
+.budget-sheet-table .sheet-price-cell button:disabled { color: #555; cursor: default; }
+.budget-sheet-table .sheet-action-cell { min-width: 52px; padding: 0; text-align: center; }
+.budget-sheet-table .sheet-action-cell button { width: 30px; height: 28px; border: 0; border-radius: 4px; background: transparent; color: #999; cursor: pointer; font-size: 17px; }
+.budget-sheet-table .sheet-action-cell button:hover { background: #FCEEEE; color: #A33; }
+.budget-sheet-table .sheet-action-cell button:disabled { opacity: .4; cursor: wait; }
+.budget-sheet-page .budget-modal .budget-input select { width: 100%; height: 38px; padding: 0 10px; border: 1px solid #DDD; border-radius: 7px; background: #FFF; font-size: 11px; }
+.budget-sheet-page .budget-modal .budget-input + .budget-input { margin-top: 12px; }
+@media (max-width: 760px) {
+  .budget-sheet-heading { align-items: flex-start; flex-direction: column; }
+  .budget-sheet-heading .primary-button { width: 100%; }
+  .budget-sheet-meta { flex-wrap: wrap; gap: 8px 12px; }
+  .budget-sheet-meta span + span { padding-left: 12px; }
+  .budget-workbook-tab-card { grid-template-columns: 30px minmax(0,1fr); }
+  .budget-workbook-open { grid-column: 2; }
+}
