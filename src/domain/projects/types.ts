@@ -41,6 +41,19 @@ export type ProjectPriceInput = {
   componentId?: string | null;
 };
 
+export type ProjectExtraMaterial = {
+  id: string;
+  name: string;
+  unit: string;
+  quantity: number;
+  catalogId: string | null;
+  variantId: string | null;
+  componentId: string | null;
+  unitPrice: number | null;
+  priceVersion?: number | null;
+  expressionSnapshot?: string | null;
+};
+
 export type ProjectInput = {
   id?: string;
   name: string;
@@ -48,6 +61,7 @@ export type ProjectInput = {
   floor?: string;
   lines: ProjectModelLineInput[];
   prices: ProjectPriceInput[];
+  extraMaterials?: ProjectExtraMaterial[];
 };
 
 export type Project = ProjectInput & { id: string; createdAt?: string; updatedAt?: string };
