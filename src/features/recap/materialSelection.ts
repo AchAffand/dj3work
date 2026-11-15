@@ -76,6 +76,9 @@ export function relatedMaterialComponents(
   if (family !== "accessory") return candidates;
 
   const needle = normalize(materialName).replace(/\b(pcs|set|unit|m2|m')\b/g, "").trim();
+  if (/\b(silicone|silicon|sealant)\b/.test(needle)) {
+    return candidates.filter((component) => /\bsealant\b/i.test(component.label));
+  }
   const matches = candidates.filter((component) => {
     const label = normalize(component.label);
     return label.includes(needle) || needle.includes(label);
