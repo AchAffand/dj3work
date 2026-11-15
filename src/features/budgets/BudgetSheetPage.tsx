@@ -180,6 +180,9 @@ export function BudgetSheetPage() {
     <section className="page-content budget-page budget-sheet-page">
       <div className="budget-sheet-heading">
         <div>
+          <button className="budget-back-button" type="button" onClick={() => navigate("/master-harga")}>
+            <span aria-hidden="true">←</span> Kembali ke Master Harga
+          </button>
           <p className="eyebrow">MASTER BUDGET KUSEN 2026</p>
           <h1>{detail.catalog.label}</h1>
           <p className="page-description">Lembar harga mengikuti susunan workbook Excel. Klik sel harga untuk mengubah nilainya.</p>
