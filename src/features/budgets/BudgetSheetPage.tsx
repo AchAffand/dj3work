@@ -9,7 +9,6 @@ import { calculateExpression } from "../../domain/formulas/evaluate";
 
 type ComponentDraft = { id?: string; key?: string; label: string; unit: string; groupLabel: string };
 type PriceDraft = { componentId: string; variantKey: string; amount: string; expression: string };
-type GroupDraft = { id?: string; name: string };
 
 const brandOf = (label: string) => label.split(" · ")[0] ?? label;
 const finishOf = (label: string) => label.includes(" · ") ? label.split(" · ").slice(1).join(" · ") : label;
@@ -27,10 +26,6 @@ export function BudgetSheetPage() {
   const [componentDraft, setComponentDraft] = useState<ComponentDraft | null>(null);
   const [priceDraft, setPriceDraft] = useState<PriceDraft | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<BudgetComponent | null>(null);
-  const [groupDraft, setGroupDraft] = useState<GroupDraft | null>(null);
-  const [groupSelectionMode, setGroupSelectionMode] = useState(false);
-  const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
-  const [confirmGroupDelete, setConfirmGroupDelete] = useState(false);
 
   const load = useCallback(async () => {
     if (!repository) { setLoading(false); return; }
@@ -55,13 +50,13 @@ export function BudgetSheetPage() {
 
   const sections = useMemo(() => {
     if (!detail) return [];
-    const ordered: [string, BudgetComponent[]][] = detail.groups.map((group) => [
-      group.name, detail.components.filter((component) => component.groupLabel?.trim() === group.name),
-    ]);
-    const known = new Set(detail.groups.map((group) => group.name));
-    const ungrouped = detail.components.filter((component) => !component.groupLabel?.trim() || !known.has(component.groupLabel.trim()));
-    if (ungrouped.length) ordered.push([detail.catalog.label, ungrouped]);
-    return ordered;
+    const ordered = new Map<string, BudgetComponent[]>();
+    for (const component of detail.components) {
+      const label = component.groupLabel?.trim() || detail.catalog.label;
+      if (!ordered.has(label)) ordered.set(label, []);
+      ordered.get(label)!.push(component);
+    }
+    return [...ordered.entries()];
   }, [detail]);
 
   const savePrice = async () => {
@@ -143,36 +138,6 @@ export function BudgetSheetPage() {
     }
   };
 
-  const saveGroup = async () => {
-    if (!repository || !detail || !groupDraft) return;
-    const name = groupDraft.name.trim();
-    if (!name) { setMessage("Nama kelompok wajib diisi."); return; }
-    setSaving(true); setMessage(null);
-    try {
-      if (groupDraft.id) await repository.renameBudgetComponentGroup(detail.catalog.id, groupDraft.id, name);
-      else await repository.createBudgetComponentGroup(detail.catalog.id, name);
-      setGroupDraft(null);
-      await load(); await reloadBudgets?.();
-      setMessage(groupDraft.id ? "Nama kelompok berhasil diperbarui." : "Kelompok baru berhasil dibuat.");
-    } catch (cause) {
-      setMessage(cause instanceof Error ? cause.message : "Kelompok gagal disimpan.");
-    } finally { setSaving(false); }
-  };
-
-  const deleteSelectedGroups = async () => {
-    if (!repository || !detail || selectedGroupIds.length === 0) return;
-    setSaving(true); setMessage(null);
-    try {
-      const deletedItems = await repository.deleteBudgetComponentGroups(detail.catalog.id, selectedGroupIds);
-      const deletedGroups = selectedGroupIds.length;
-      setSelectedGroupIds([]); setConfirmGroupDelete(false); setGroupSelectionMode(false);
-      await load(); await reloadBudgets?.();
-      setMessage(`${deletedGroups} kelompok dan ${deletedItems} item beserta harga terkait berhasil dihapus permanen dari database.`);
-    } catch (cause) {
-      setMessage(cause instanceof Error ? cause.message : "Kelompok gagal dihapus.");
-    } finally { setSaving(false); }
-  };
-
   const archiveComponent = async () => {
     if (!repository || !detail || !deleteTarget) return;
     setSaving(true);
@@ -204,17 +169,10 @@ export function BudgetSheetPage() {
           <h1>{detail.catalog.label}</h1>
           <p className="page-description">Lembar harga mengikuti susunan workbook Excel. Klik sel harga untuk mengubah nilainya.</p>
         </div>
-        {isCatalogAdmin && <div className="budget-group-toolbar">
-          <button className="budget-group-button budget-group-create" type="button" onClick={() => setGroupDraft({ name: "" })}><span>＋</span> BUAT KELOMPOK BARU</button>
-          <button className={`budget-group-button budget-group-delete ${groupSelectionMode ? "is-active" : ""}`} type="button" onClick={() => {
-            if (groupSelectionMode && selectedGroupIds.length) setConfirmGroupDelete(true);
-            else { setGroupSelectionMode(!groupSelectionMode); setSelectedGroupIds([]); }
-          }}>{groupSelectionMode && selectedGroupIds.length ? `HAPUS (${selectedGroupIds.length})` : groupSelectionMode ? "BATAL HAPUS" : "HAPUS KELOMPOK"}</button>
-          <button className="primary-button" type="button" onClick={() => {
-            setComponentDraft({ label: "", unit: "pcs", groupLabel: sections[0]?.[0] ?? "" });
-            setMessage(null);
-          }}>+ Tambah item</button>
-        </div>}
+        {isCatalogAdmin && <button className="primary-button" type="button" onClick={() => {
+          setComponentDraft({ label: "", unit: "pcs", groupLabel: sections[0]?.[0] ?? "" });
+          setMessage(null);
+        }}>+ Tambah item</button>}
       </div>
 
       <nav className="budget-sheet-tabs" aria-label="Lembar workbook">
@@ -258,19 +216,7 @@ export function BudgetSheetPage() {
             {sections.map(([section, components]) => (
               <Fragment key={section}>
                 <tr className="budget-sheet-section-row">
-                  <td colSpan={3 + detail.variants.length + (isCatalogAdmin ? 1 : 0)}>
-                    <div className="budget-group-heading">
-                      {groupSelectionMode && isCatalogAdmin && detail.groups.some((group) => group.name === section) && <input aria-label={`Pilih kelompok ${section}`} type="checkbox" checked={selectedGroupIds.includes(detail.groups.find((group) => group.name === section)!.id)} onChange={(event) => {
-                        const id = detail.groups.find((group) => group.name === section)!.id;
-                        setSelectedGroupIds((current) => event.target.checked ? [...current, id] : current.filter((item) => item !== id));
-                      }} />}
-                      <strong>{section}</strong>
-                      {isCatalogAdmin && detail.groups.some((group) => group.name === section) && <button className="budget-group-edit" type="button" title="Edit nama kelompok" onClick={() => {
-                        const group = detail.groups.find((item) => item.name === section)!;
-                        setGroupDraft({ id: group.id, name: group.name });
-                      }}>EDIT NAMA</button>}
-                    </div>
-                  </td>
+                  <td colSpan={3 + detail.variants.length + (isCatalogAdmin ? 1 : 0)}>{section}</td>
                 </tr>
                 {components.map((component, index) => (
                   <tr key={component.id}>
@@ -315,26 +261,7 @@ export function BudgetSheetPage() {
         </form>
       </div>}
 
-      {groupDraft && <div className="budget-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setGroupDraft(null); }}>
-        <form className="budget-modal budget-group-modal" role="dialog" aria-modal="true" aria-labelledby="budget-group-title" onSubmit={(event) => { event.preventDefault(); void saveGroup(); }}>
-          <p className="eyebrow">KELOLA KELOMPOK</p>
-          <h2 id="budget-group-title">{groupDraft.id ? "Edit nama kelompok" : "Buat kelompok baru"}</h2>
-          <label className="budget-input"><span>Nama kelompok</span><input autoFocus required maxLength={80} value={groupDraft.name} onChange={(event) => setGroupDraft({ ...groupDraft, name: event.target.value })} placeholder="Contoh: KOMPONEN UTAMA" /></label>
-          <div className="budget-modal-actions"><button className="budget-group-button" type="button" onClick={() => setGroupDraft(null)}>BATAL</button><button className="budget-group-button budget-group-create" type="submit" disabled={saving}>{saving ? "MENYIMPAN…" : "SIMPAN KELOMPOK"}</button></div>
-        </form>
-      </div>}
-
-      {confirmGroupDelete && <div className="budget-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setConfirmGroupDelete(false); }}>
-        <div className="budget-modal" role="alertdialog" aria-modal="true" aria-labelledby="budget-group-delete-title">
-          <p className="eyebrow">HAPUS PERMANEN</p>
-          <h2 id="budget-group-delete-title">Hapus {selectedGroupIds.length} kelompok?</h2>
-          <p className="budget-help">Seluruh item dalam kelompok terpilih dan data harga terkait akan dihapus permanen dari database. Tindakan ini tidak dapat dibatalkan.</p>
-          <ul className="budget-group-delete-list">{detail.groups.filter((group) => selectedGroupIds.includes(group.id)).map((group) => <li key={group.id}>{group.name} <span>({detail.components.filter((component) => component.groupLabel?.trim() === group.name).length} item)</span></li>)}</ul>
-          <div className="budget-modal-actions"><button className="budget-group-button" type="button" onClick={() => setConfirmGroupDelete(false)}>BATAL</button><button className="budget-group-button budget-group-delete is-active" type="button" disabled={saving} onClick={() => void deleteSelectedGroups()}>{saving ? "MENGHAPUS…" : "HAPUS PERMANEN"}</button></div>
-        </div>
-      </div>}
-
-            {priceDraft && <div className="budget-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setPriceDraft(null); }}>
+      {priceDraft && <div className="budget-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setPriceDraft(null); }}>
         <form className="budget-modal" role="dialog" aria-modal="true" aria-labelledby="budget-sheet-price-title" onSubmit={(event) => { event.preventDefault(); void savePrice(); }}>
           <p className="eyebrow">EDIT SEL HARGA</p>
           <h2 id="budget-sheet-price-title">{detail.components.find((item) => item.id === priceDraft.componentId)?.label}</h2>
