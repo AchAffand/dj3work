@@ -130,7 +130,7 @@ export function BudgetWorkspacePage() {
           <p className="eyebrow">HAPUS KELOMPOK</p>
           <h2 id="budget-group-delete-title">Hapus “{deleteTarget.label}”?</h2>
           <p className="budget-help">Tindakan ini menghapus kelompok beserta seluruh item, varian, dan harga di dalamnya secara permanen. Perkiraan Master Harga tersimpan yang memakai kelompok ini juga akan terhapus. Tindakan ini tidak dapat dibatalkan.</p>
-          <div className="budget-modal-actions">
+          <div className="budget-modal-actions budget-delete-actions">
             <button className="secondary-button" type="button" disabled={saving} onClick={() => setDeleteTarget(null)}>Batal</button>
             <button className="formula-danger-button" type="button" disabled={saving} onClick={() => void deleteGroup()}>{saving ? "Menghapus…" : "Hapus permanen"}</button>
           </div>
