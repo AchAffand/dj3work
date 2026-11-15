@@ -243,6 +243,12 @@ export function createSupabaseRepository(client: SupabaseClient) {
       }));
     },
 
+    async deleteProject(id: string): Promise<void> {
+      const { data, error } = await client.from("projects").delete().eq("id", id).select("id").maybeSingle();
+      throwIfError(error);
+      if (!data) throw new Error("Proyek tidak ditemukan atau tidak dapat dihapus.");
+    },
+
     async loadProject(id: string): Promise<Project | null> {
       const { data, error } = await client
         .from("projects")
