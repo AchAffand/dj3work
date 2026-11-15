@@ -32,13 +32,13 @@ const familyLabels = {
 } as const;
 
 export function MaterialRecap({ rows, total, budgetCatalogs, budgetDetails, onSelectionChange, onPriceChange, extraMaterials, onExtraMaterialsChange }: MaterialRecapProps) {
-  const missingPrices = rows.filter((row) => row.unitPrice === null).length;
+  const missingPrices = rows.filter((row) => row.unitPrice === null).length + extraMaterials.filter((item) => item.unitPrice === null && item.componentId).length;
   const visibleExtraMaterials = extraMaterials.filter((item) => !item.name.startsWith("__door_finish__:"));
   return (
     <section className="recap-card">
       <div className="recap-heading">
         <div><p className="eyebrow">RINGKASAN KEBUTUHAN</p><h2>Rekap material</h2></div>
-        <span className="recap-count">{rows.length} item</span>
+        <span className="recap-count">{rows.length + extraMaterials.length} item</span>
       </div>
       {rows.length === 0 ? (
         <div className="recap-empty"><span className="recap-empty-mark">↗</span><strong>Rekap akan muncul di sini</strong><p>Pilih model dan isi ukuran untuk melihat total bahan.</p></div>
@@ -130,7 +130,7 @@ export function MaterialRecap({ rows, total, budgetCatalogs, budgetDetails, onSe
                                 {detail.components.filter((component) => /melamin|finishing duco/i.test(component.label)).map((component) => <option key={component.id} value={component.id}>{componentLabel(component)}</option>)}
                               </select>
                               {extraMaterials.find((item) => item.name === `__door_finish__:${row.materialCode}`)?.unitPrice != null && (
-                                <small>Tambahan finishing: {formatRupiah(extraMaterials.find((item) => item.name === `__door_finish__:${row.materialCode}`)!.unitPrice!)}</small>
+                                <small>Tambahan finishing: {formatRupiah(extraMaterials.find((item) => item.name === `__door_finish__:${row.materialCode}`)!.unitPrice!)} · Qty {formatQuantity(row.quantity)}</small>
                               )}
                             </label>
                           )}
