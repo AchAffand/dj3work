@@ -66,7 +66,7 @@ export function CalculatorPage() {
       void projectService.loadProject(projectId).then((project) => {
         if (!project) {
           setMessage({ tone: "error", text: "Proyek tidak ditemukan atau tidak dapat dibuka." });
-          setDraft({ name: "", location: "", floor: "", lines: models.length ? [makeLine(models[0].code)] : [], prices: {} });
+          setDraft({ name: "", location: "", floor: "", lines: models.length ? [makeLine(models[0].code)] : [], prices: {}, materialSelections: {} });
           return;
         }
         setDraft({
@@ -75,7 +75,8 @@ export function CalculatorPage() {
           location: project.location ?? "",
           floor: project.floor ?? "",
           lines: project.lines,
-          prices: priceMap(project),\n          materialSelections: materialSelectionMap(project),
+          prices: priceMap(project),
+          materialSelections: materialSelectionMap(project),
         });
         setMessage(null);
       }).catch((error) => {
@@ -171,7 +172,8 @@ export function CalculatorPage() {
         location: saved.project.location ?? "",
         floor: saved.project.floor ?? "",
         lines: saved.project.lines,
-        prices: priceMap(saved.project),\n        materialSelections: materialSelectionMap(saved.project),
+        prices: priceMap(saved.project),
+        materialSelections: materialSelectionMap(saved.project),
       });
       setSearchParams(new URLSearchParams({ project: saved.project.id }), { replace: true });
       setMessage({ tone: "success", text: `Perhitungan tersimpan · ${formatRupiah(saved.total)} sementara.` });
@@ -222,7 +224,8 @@ export function CalculatorPage() {
               models={models}
               results={results}
               onChange={updateLine}
-              onRemove={removeLine}\n            />
+              onRemove={removeLine}
+            />
           ) : (
             <div className="empty-models"><strong>Belum ada model</strong><p>Tambahkan setidaknya satu model pintu untuk mulai menghitung.</p></div>
           )}
