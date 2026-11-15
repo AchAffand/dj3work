@@ -105,6 +105,7 @@ function mapProject(row: Record<string, unknown>): Project {
   const lines = (row.project_model_lines as Record<string, unknown>[] | null) ?? [];
   const prices = (row.project_material_prices as Record<string, unknown>[] | null) ?? [];
   const priceSnapshots = (row.project_line_price_snapshots as Record<string, unknown>[] | null) ?? [];
+  const extraMaterials = (row.project_extra_materials as Record<string, unknown>[] | null) ?? [];
   return {
     id: String(row.id),
     name: String(row.name),
@@ -121,6 +122,15 @@ function mapProject(row: Record<string, unknown>): Project {
       resultSnapshot: (line.result_snapshot ?? { items: [], errors: [] }) as Project["lines"][number]["resultSnapshot"],
       priceCatalogId: typeof line.price_catalog_id === "string" ? line.price_catalog_id : null,
       priceVariantId: typeof line.price_variant_id === "string" ? line.price_variant_id : null,
+    })),
+    extraMaterials: extraMaterials.map((item) => ({
+      id: String(item.id), name: String(item.name_snapshot), unit: String(item.unit_snapshot),
+      quantity: Number(item.quantity), catalogId: typeof item.catalog_id === "string" ? item.catalog_id : null,
+      variantId: typeof item.variant_id === "string" ? item.variant_id : null,
+      componentId: typeof item.component_id === "string" ? item.component_id : null,
+      unitPrice: typeof item.unit_price === "number" ? item.unit_price : null,
+      priceVersion: typeof item.price_version === "number" ? item.price_version : null,
+      expressionSnapshot: typeof item.expression_snapshot === "string" ? item.expression_snapshot : null,
     })),
     prices: [
       ...prices.map((price) => ({
@@ -252,7 +262,7 @@ export function createSupabaseRepository(client: SupabaseClient) {
     async loadProject(id: string): Promise<Project | null> {
       const { data, error } = await client
         .from("projects")
-        .select("id,name,location,floor,created_at,updated_at,project_model_lines(id,model_code,inputs,model_count,formula_snapshot,result_snapshot,price_catalog_id,price_variant_id),project_material_prices(material_code,name_snapshot,unit_snapshot,unit_price),project_line_price_snapshots(material_code,catalog_id,variant_id,name_snapshot,unit_snapshot,unit_price,component_id,price_version,expression_snapshot)")
+        .select("id,name,location,floor,created_at,updated_at,project_model_lines(id,model_code,inputs,model_count,formula_snapshot,result_snapshot,price_catalog_id,price_variant_id),project_material_prices(material_code,name_snapshot,unit_snapshot,unit_price),project_line_price_snapshots(material_code,catalog_id,variant_id,name_snapshot,unit_snapshot,unit_price,component_id,price_version,expression_snapshot),project_extra_materials(id,name_snapshot,unit_snapshot,quantity,catalog_id,variant_id,component_id,unit_price,price_version,expression_snapshot)")
         .eq("id", id)
         .maybeSingle();
       throwIfError(error);
@@ -290,6 +300,17 @@ export function createSupabaseRepository(client: SupabaseClient) {
       throwIfError(error);
       const id = typeof data === "string" ? data : input.id;
       if (!id) throw new Error("Supabase tidak mengembalikan ID proyek");
+      const { error: deleteExtraError } = await client.from("project_extra_materials").delete().eq("project_id", id);
+      throwIfError(deleteExtraError);
+      if (input.extraMaterials?.length) {
+        const { error: insertExtraError } = await client.from("project_extra_materials").insert(input.extraMaterials.map((item, position) => ({
+          id: item.id, project_id: id, name_snapshot: item.name, unit_snapshot: item.unit,
+          quantity: item.quantity, catalog_id: item.catalogId, variant_id: item.variantId,
+          component_id: item.componentId, unit_price: item.unitPrice, price_version: item.priceVersion ?? null,
+          expression_snapshot: item.expressionSnapshot ?? null, position, updated_at: new Date().toISOString(),
+        })));
+        throwIfError(insertExtraError);
+      }
       return { ...input, id };
     },
 
