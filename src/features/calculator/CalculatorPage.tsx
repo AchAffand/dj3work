@@ -11,6 +11,7 @@ import { createProjectService, type MaterialSelection, type ProjectDraft, type P
 import { ModelLineEditor } from "./ModelLineEditor";
 import { budgetPriceForMaterial } from "../../domain/budgets/pricing";
 import type { BudgetCatalogDetail } from "../../domain/budgets/types";
+import { catalogForFamily, materialFamily } from "../recap/materialSelection";
 
 function makeLine(modelCode: number): ProjectLineDraft {
   return {
@@ -29,7 +30,7 @@ function materialSelectionMap(project: Project): Record<string, MaterialSelectio
     if (!line.priceCatalogId || !line.priceVariantId) continue;
     for (const material of line.resultSnapshot.items) result[String(material.materialCode)] ??= { catalogId: line.priceCatalogId, variantId: line.priceVariantId };
   }
-  for (const price of project.prices) if (price.catalogId || price.variantId) result[String(price.materialCode)] = { catalogId: price.catalogId ?? null, variantId: price.variantId ?? null };
+  for (const price of project.prices) if (price.catalogId || price.variantId) result[String(price.materialCode)] = { catalogId: price.catalogId ?? null, variantId: price.variantId ?? null, componentId: price.componentId ?? null };
   return result;
 }
 
@@ -118,13 +119,22 @@ export function CalculatorPage() {
   const recap = useMemo(() => aggregateMaterials(
     draft.lines.map((line) => ({
       materials: (results.get(line.id ?? `${line.modelCode}`)?.items ?? []).map((material) => {
-        const selection = draft.materialSelections?.[String(material.materialCode)] ?? { catalogId: line.priceCatalogId ?? null, variantId: line.priceVariantId ?? null };
+        const family = materialFamily(material.name, material.unit);
+        const inferredCatalog = catalogForFamily(family, budgetCatalogs);
+        const savedSelection = draft.materialSelections?.[String(material.materialCode)] ?? { catalogId: line.priceCatalogId ?? null, variantId: line.priceVariantId ?? null, componentId: null };
+        const selection = {
+          ...savedSelection,
+          catalogId: inferredCatalog?.id ?? savedSelection.catalogId,
+        };
         const detail = selection.catalogId ? budgetDetails.get(selection.catalogId) : undefined;
         const variant = detail?.variants.find((item) => item.id === selection.variantId);
-        const mapped = budgetPriceForMaterial(detail, material.materialCode, material.name, material.unit, selection.variantId);
+        const requiresAluminiumProfile = family === "aluminium" && /\\bkusen\\b/i.test(material.name);
+        const mapped = requiresAluminiumProfile && !selection.componentId
+          ? null
+          : budgetPriceForMaterial(detail, material.materialCode, material.name, material.unit, selection.variantId, null, null, null, null, null, selection.componentId);
         return {
           ...material,
-          priceKey: mapped?.priceKey ?? (detail && variant ? `${detail.catalog.id}:${variant.id}:${material.materialCode}` : `manual:${material.materialCode}`),
+          priceKey: mapped?.priceKey ?? (detail && variant && selection.componentId ? `${detail.catalog.id}:${variant.id}:${material.materialCode}:${selection.componentId}` : `manual:${material.materialCode}`),
           catalogId: selection.catalogId,
           variantId: selection.variantId,
           unitPrice: mapped?.unitPrice ?? null,
