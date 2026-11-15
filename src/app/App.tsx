@@ -9,7 +9,7 @@ export function App() {
   return (
     <AuthProvider>
       <AppServicesProvider>
-        <BrowserRouter>
+        <BrowserRouter basename="/dj3work">
           <ProtectedRoute>
             <AppShell><AppRoutes /></AppShell>
           </ProtectedRoute>
