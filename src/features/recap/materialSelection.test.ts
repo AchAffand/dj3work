@@ -34,6 +34,12 @@ describe("relational material selection", () => {
     expect(relatedMaterialComponents(aluminiumDetail, "aluminium", "Kusen").map((item) => item.id)).toEqual(["kusen-4", "kusen-3"]);
   });
 
+  it("matches non-kusen aluminium items to their own components", () => {
+    expect(materialFamily("Hollow tengah", "M'")).toBe("aluminium");
+    expect(relatedMaterialComponents(aluminiumDetail, "aluminium", "Hollow tengah").map((item) => item.id)).toEqual(["hollow"]);
+    expect(materialFamily("Pintu", "M'")).toBe("aluminium");
+  });
+
   it("separates aluminium brands from finish variants while retaining the exact price variant", () => {
     expect(aluminiumBrands(aluminiumDetail)).toEqual(["HPM", "ALEXINDO", "YKK"]);
     expect(aluminiumFinishes(aluminiumDetail, "HPM")).toEqual(["SILVER", "BROWN/ANODIZE"]);
