@@ -33,6 +33,7 @@ const familyLabels = {
 
 export function MaterialRecap({ rows, total, budgetCatalogs, budgetDetails, onSelectionChange, onPriceChange, extraMaterials, onExtraMaterialsChange }: MaterialRecapProps) {
   const missingPrices = rows.filter((row) => row.unitPrice === null).length;
+  const visibleExtraMaterials = extraMaterials.filter((item) => !item.name.startsWith("__door_finish__:"));
   return (
     <section className="recap-card">
       <div className="recap-heading">
@@ -109,6 +110,30 @@ export function MaterialRecap({ rows, total, budgetCatalogs, budgetDetails, onSe
                               {components.map((component) => <option key={component.id} value={component.id}>{componentLabel(component)}</option>)}
                             </select>
                           </label>
+                          {family === "door-leaf" && (
+                            <label className="recap-select-field">
+                              <span className="sr-only">Finishing daun pintu {row.name}</span>
+                              <select value={extraMaterials.find((item) => item.name === `__door_finish__:${row.materialCode}`)?.componentId ?? ""} onChange={(event) => {
+                                const finishId = event.target.value;
+                                const finish = detail.components.find((component) => component.id === finishId);
+                                const key = `__door_finish__:${row.materialCode}`;
+                                const existing = extraMaterials.find((item) => item.name === key);
+                                const next = extraMaterials.filter((item) => item.name !== key);
+                                if (finish) next.push({
+                                  id: existing?.id ?? (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `finish-${row.materialCode}-${Date.now()}`),
+                                  name: key, unit: finish.unit, quantity: row.quantity, catalogId: detail.catalog.id,
+                                  variantId: row.variantId, componentId: finish.id, unitPrice: null,
+                                });
+                                onExtraMaterialsChange(next);
+                              }}>
+                                <option value="">Tanpa finishing</option>
+                                {detail.components.filter((component) => /melamin|finishing duco/i.test(component.label)).map((component) => <option key={component.id} value={component.id}>{componentLabel(component)}</option>)}
+                              </select>
+                              {extraMaterials.find((item) => item.name === `__door_finish__:${row.materialCode}`)?.unitPrice != null && (
+                                <small>Tambahan finishing: {formatRupiah(extraMaterials.find((item) => item.name === `__door_finish__:${row.materialCode}`)!.unitPrice!)}</small>
+                              )}
+                            </label>
+                          )}
                           {detail.variants.length > 1 && (
                             <label className="recap-select-field">
                               <span className="sr-only">Varian harga {row.name}</span>
@@ -169,12 +194,12 @@ export function MaterialRecap({ rows, total, budgetCatalogs, budgetDetails, onSe
             name: "", unit: "", quantity: 1, catalogId: null, variantId: null, componentId: null, unitPrice: null,
           }])}>＋ Tambah material</button>
         </div>
-        {extraMaterials.length > 0 && (
+        {visibleExtraMaterials.length > 0 && (
           <div className="recap-table-wrap">
             <table className="recap-table">
               <thead><tr><th>Kelompok & material</th><th>Qty</th><th>Varian</th><th>Harga satuan</th><th>Subtotal</th><th></th></tr></thead>
               <tbody>
-                {extraMaterials.map((item) => {
+                {visibleExtraMaterials.map((item) => {
                   const detail = item.catalogId ? budgetDetails.get(item.catalogId) : undefined;
                   const selectedComponent = detail?.components.find((component) => component.id === item.componentId);
                   const selectedVariant = detail?.variants.find((variant) => variant.id === item.variantId);
@@ -187,7 +212,8 @@ export function MaterialRecap({ rows, total, budgetCatalogs, budgetDetails, onSe
                           <label className="recap-select-field">
                             <span className="sr-only">Kelompok material tambahan</span>
                             <select value={detail?.catalog.slug ?? ""} onChange={(event) => {
-                              const family = event.target.value as "aluminium" | "glass" | "accessory" | "door-leaf";
+                              const slug = event.target.value;
+                              const family = slug === "almunium" ? "aluminium" : slug === "kaca" ? "glass" : slug === "ass" ? "accessory" : "door-leaf";
                               const catalog = catalogForFamily(family, budgetCatalogs);
                               const nextDetail = catalog ? budgetDetails.get(catalog.id) : undefined;
                               update({ catalogId: catalog?.id ?? null, variantId: nextDetail?.variants.length === 1 ? nextDetail.variants[0].id : null, componentId: null, name: "", unit: "", unitPrice: null });
