@@ -694,12 +694,19 @@ h1 { margin: 0; color: var(--ink); font-size: clamp(28px, 3vw, 37px); font-weigh
 
 
 /* Master Harga workbook / spreadsheet presentation */
-.budget-workbook-list { display: grid; gap: 10px; max-width: 760px; }
-.budget-workbook-tab-card { display: grid; grid-template-columns: 42px minmax(0,1fr) auto; min-height: 68px; align-items: center; gap: 14px; padding: 12px 17px; border: 1px solid #DCDCDC; border-radius: 8px; background: #FFF; color: var(--ink); cursor: pointer; text-align: left; transition: border-color .15s, background .15s; }
+.budget-workbook-list { display: grid; gap: 10px; max-width: 920px; }
+.budget-workbook-tab-card { display: grid; grid-template-columns: 42px minmax(0,1fr) auto; min-height: 68px; align-items: center; gap: 14px; padding: 12px 17px; border: 1px solid #DCDCDC; border-radius: 8px; background: #FFF; color: var(--ink); transition: border-color .15s, background .15s; }
 .budget-workbook-tab-card:hover { border-color: #999; background: #FAFAFA; }
 .budget-workbook-index { color: #999; font-family: ui-monospace, monospace; font-size: 11px; }
+.budget-workbook-open-button { display: flex; min-width: 0; align-items: center; justify-content: space-between; gap: 16px; padding: 4px 0; border: 0; background: transparent; color: inherit; cursor: pointer; text-align: left; }
+.budget-workbook-open-button:hover .budget-workbook-name { text-decoration: underline; text-underline-offset: 3px; }
 .budget-workbook-name { font-size: 14px; font-weight: 700; }
 .budget-workbook-open { color: #777; font-size: 10px; white-space: nowrap; }
+.budget-card-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 7px; }
+.budget-card-actions .secondary-button, .budget-card-actions .formula-danger-button { min-height: 36px; margin: 0; padding: 0 12px; font-size: 10px; }
+.budget-card-actions .formula-danger-button { border: 1px solid #B42318; border-radius: 7px; background: #B42318; color: #FFF; cursor: pointer; font-weight: 650; }
+.budget-card-actions .formula-danger-button:hover:not(:disabled) { background: #912018; border-color: #912018; }
+.budget-card-actions button:disabled { cursor: wait; opacity: .55; }
 .budget-sheet-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
 .budget-sheet-heading .page-description { margin-top: 7px; }
 .budget-sheet-tabs { display: flex; gap: 3px; overflow-x: auto; margin-bottom: 0; padding: 0 4px; border-bottom: 1px solid #BDBDBD; }
@@ -739,5 +746,7 @@ h1 { margin: 0; color: var(--ink); font-size: clamp(28px, 3vw, 37px); font-weigh
   .budget-sheet-meta { flex-wrap: wrap; gap: 8px 12px; }
   .budget-sheet-meta span + span { padding-left: 12px; }
   .budget-workbook-tab-card { grid-template-columns: 30px minmax(0,1fr); }
-  .budget-workbook-open { grid-column: 2; }
+  .budget-workbook-open-button { align-items: flex-start; flex-direction: column; gap: 5px; }
+  .budget-card-actions { grid-column: 2; justify-content: flex-start; }
+  .budget-card-actions .secondary-button, .budget-card-actions .formula-danger-button { min-height: 32px; }
 }

@@ -344,6 +344,18 @@ export function createSupabaseRepository(client: SupabaseClient) {
       return mapped;
     },
 
+    async createBudgetCatalog(label: string): Promise<string> {
+      const { data, error } = await client.rpc("create_budget_catalog", { p_label: label });
+      throwIfError(error);
+      if (typeof data !== "string") throw new Error("Supabase tidak mengembalikan ID kelompok harga");
+      return data;
+    },
+
+    async renameBudgetCatalog(catalogId: string, label: string): Promise<void> {
+      const { error } = await client.rpc("rename_budget_catalog", { p_catalog_id: catalogId, p_label: label });
+      throwIfError(error);
+    },
+
     async deleteBudgetCatalog(catalogId: string): Promise<void> {
       const { error } = await client.rpc("delete_budget_catalog", { p_catalog_id: catalogId });
       throwIfError(error);
