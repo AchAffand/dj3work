@@ -8,7 +8,7 @@ const normalize = (value: string) => value.normalize("NFKC").trim().replace(/\s+
 export function materialFamily(name: string, unit: string): MaterialFamily {
   const normalizedName = normalize(name);
   if (/\b(kusen|aluminium|almunium)\b/.test(normalizedName)) return "aluminium";
-  if (isDoorLeafMaterial({ name, unit }) || /daun pintu|pintu kayu|pintu hdf|pintu wpc|pintu pvc/.test(normalizedName)) return "door-leaf";
+  if (isDoorLeafMaterial({ name, unit }) || /daun pintu|pintu kayu|pintu hdf|pintu wpc|pintu pvc/.test(normalizedName) || (normalizedName === "pintu" && ["set", "unit", "daun"].includes(normalize(unit)))) return "door-leaf";
   if (isGlassMaterial({ name, unit })) return "glass";
   if (isAccessoryMaterial({ name, unit })) return "accessory";
   return "other";
