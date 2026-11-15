@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Redirecting…</title>
+    <script>
+      const base = "/dj3work";
+      const path = window.location.pathname.startsWith(base)
+        ? window.location.pathname.slice(base.length)
+        : "/";
+      const query = window.location.search.slice(1);
+      const hash = window.location.hash.slice(1);
+      const target = base + "/?p=" + encodeURIComponent(path || "/") +
+        "&q=" + encodeURIComponent(query) +
+        "&h=" + encodeURIComponent(hash);
+      window.location.replace(target);
+    </script>
+  </head>
+  <body>Redirecting…</body>
+</html>
