@@ -939,3 +939,12 @@ h1 { margin: 0; color: var(--ink); font-size: clamp(28px, 3vw, 37px); font-weigh
   .recap-select-field { min-width: 104px; }
   .recap-table { min-width: 700px; }
 }
+
+.recap-selection-stack { display: grid; gap: 6px; min-width: 190px; }
+.recap-selection-stack .recap-select-field { min-width: 0; max-width: none; }
+.recap-select-pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 6px; }
+.recap-family-tag { width: fit-content; padding: 3px 7px; border-radius: 4px; background: #F2F4F6; color: #59616A; font-size: 8px; font-weight: 700; letter-spacing: .08em; }
+.recap-selection-stack .recap-select-field select { min-height: 32px; font-size: 10px; }
+@media (max-width: 720px) {
+  .recap-selection-stack { min-width: 210px; }
+}
