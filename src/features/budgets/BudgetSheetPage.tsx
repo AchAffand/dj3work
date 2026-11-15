@@ -59,6 +59,21 @@ export function BudgetSheetPage() {
     return [...ordered.entries()];
   }, [detail]);
 
+  const sectionConfig: Record<string, { fieldLabel: string; defaultOption: string }> = {
+    almunium: { fieldLabel: "Jenis komponen", defaultOption: "ALMUNIUM" },
+    kaca: { fieldLabel: "Jenis kaca", defaultOption: "JENIS KACA" },
+    ass: { fieldLabel: "Jenis aksesoris", defaultOption: "ASESORIS" },
+    "daun-pintu": { fieldLabel: "Jenis pintu", defaultOption: "JENIS PINTU" },
+  };
+  const sectionField = sectionConfig[detail?.catalog.slug ?? ""] ?? {
+    fieldLabel: "Jenis item",
+    defaultOption: detail?.catalog.label ?? "",
+  };
+  const sectionOptions = [...new Set([
+    sectionField.defaultOption,
+    ...sections.map(([label]) => label),
+  ].filter(Boolean))];
+
   const savePrice = async () => {
     if (!repository || !detail || !priceDraft) return;
     const amount = priceDraft.amount.trim() ? Number(priceDraft.amount.replaceAll(",", "")) : null;
@@ -170,7 +185,7 @@ export function BudgetSheetPage() {
           <p className="page-description">Lembar harga mengikuti susunan workbook Excel. Klik sel harga untuk mengubah nilainya.</p>
         </div>
         {isCatalogAdmin && <button className="primary-button" type="button" onClick={() => {
-          setComponentDraft({ label: "", unit: "pcs", groupLabel: sections[0]?.[0] ?? "" });
+          setComponentDraft({ label: "", unit: "pcs", groupLabel: sectionOptions[0] ?? "" });
           setMessage(null);
         }}>+ Tambah item</button>}
       </div>
@@ -256,7 +271,7 @@ export function BudgetSheetPage() {
           <h2 id="budget-sheet-item-title">{componentDraft.id ? "Ubah item" : "Tambah item"}</h2>
           <label className="budget-input"><span>Uraian item</span><input autoFocus required value={componentDraft.label} onChange={(event) => setComponentDraft({ ...componentDraft, label: event.target.value })} /></label>
           <label className="budget-input"><span>Satuan</span><input value={componentDraft.unit} onChange={(event) => setComponentDraft({ ...componentDraft, unit: event.target.value })} /></label>
-          <label className="budget-input"><span>Bagian lembar Excel</span><select value={componentDraft.groupLabel} onChange={(event) => setComponentDraft({ ...componentDraft, groupLabel: event.target.value })}>{sections.map(([label]) => <option key={label} value={label}>{label}</option>)}</select></label>
+          <label className="budget-input"><span>{sectionField.fieldLabel}</span><select required value={componentDraft.groupLabel} onChange={(event) => setComponentDraft({ ...componentDraft, groupLabel: event.target.value })}>{sectionOptions.map((label) => <option key={label} value={label}>{label}</option>)}</select><small className="budget-help">Pilih jenis sesuai judul bagian pada lembar {detail.catalog.label}.</small></label>
           <div className="budget-modal-actions"><button className="secondary-button" type="button" onClick={() => setComponentDraft(null)}>Batal</button><button className="primary-button" type="submit" disabled={saving}>{saving ? "Menyimpan…" : "Simpan"}</button></div>
         </form>
       </div>}
