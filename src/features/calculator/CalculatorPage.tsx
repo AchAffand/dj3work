@@ -85,7 +85,7 @@ export function CalculatorPage() {
         setMessage({ tone: "error", text: error instanceof Error ? error.message : "Proyek tidak dapat dibuka." });
       }).finally(() => setLoadingProject(false));
     } else {
-      setDraft({ name: "", location: "", floor: "", lines: models.length ? [makeLine(models[0].code)] : [], prices: {}, materialSelections: {} });
+      setDraft({ name: "", location: "", floor: "", lines: models.length ? [makeLine(models[0].code)] : [], prices: {}, materialSelections: {}, extraMaterials: [] });
       setMessage(null);
     }
   }, [catalogError, loadingCatalog, models, projectId, projectService, repository, routeKey]);
@@ -154,7 +154,13 @@ export function CalculatorPage() {
     draft.prices,
   ), [budgetDetails, draft.lines, draft.materialSelections, draft.prices, results]);
   const extraMaterials = (draft.extraMaterials ?? []) as ProjectExtraMaterial[];
-  const pricedExtraMaterials = extraMaterials.map((item, index) => {
+  const syncedExtraMaterials = extraMaterials.map((item) => {
+    if (!item.name.startsWith("__door_finish__:")) return item;
+    const materialCode = Number(item.name.split(":")[1]);
+    const sourceRow = recap.find((row) => row.materialCode === materialCode);
+    return sourceRow ? { ...item, quantity: sourceRow.quantity, variantId: sourceRow.variantId } : item;
+  });
+  const pricedExtraMaterials = syncedExtraMaterials.map((item, index) => {
     const detail = item.catalogId ? budgetDetails.get(item.catalogId) : undefined;
     const price = budgetPriceForMaterial(detail, -100000 - index, item.name, item.unit, item.variantId, null, null, null, null, null, item.componentId);
     return { ...item, unitPrice: price?.unitPrice ?? item.unitPrice, priceVersion: price?.priceVersion ?? item.priceVersion ?? null, expressionSnapshot: price?.expressionSnapshot ?? item.expressionSnapshot ?? null };
