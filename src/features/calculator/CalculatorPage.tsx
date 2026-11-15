@@ -7,7 +7,7 @@ import { formatRupiah } from "../../app/format";
 import { useAppServices } from "../../app/AppServices";
 import { aggregateMaterials } from "../recap/aggregateMaterials";
 import { MaterialRecap } from "../recap/MaterialRecap";
-import { createProjectService, type ProjectDraft, type ProjectLineDraft } from "../projects/projectService";
+import { createProjectService, type MaterialSelection, type ProjectDraft, type ProjectLineDraft } from "../projects/projectService";
 import { ModelLineEditor } from "./ModelLineEditor";
 import { budgetPriceForMaterial } from "../../domain/budgets/pricing";
 import type { BudgetCatalogDetail } from "../../domain/budgets/types";
@@ -21,6 +21,16 @@ function makeLine(modelCode: number): ProjectLineDraft {
     inputs: {},
     count: 1,
   };
+}
+
+function materialSelectionMap(project: Project): Record<string, MaterialSelection> {
+  const result: Record<string, MaterialSelection> = {};
+  for (const line of project.lines) {
+    if (!line.priceCatalogId || !line.priceVariantId) continue;
+    for (const material of line.resultSnapshot.items) result[String(material.materialCode)] ??= { catalogId: line.priceCatalogId, variantId: line.priceVariantId };
+  }
+  for (const price of project.prices) if (price.catalogId || price.variantId) result[String(price.materialCode)] = { catalogId: price.catalogId ?? null, variantId: price.variantId ?? null };
+  return result;
 }
 
 function priceMap(project: Project): Record<string, number | null | undefined> {
@@ -41,7 +51,7 @@ export function CalculatorPage() {
   );
   const routeKey = projectId ?? "new";
   const hydratedRoute = useRef<string | null>(null);
-  const [draft, setDraft] = useState<ProjectDraft>({ name: "", location: "", floor: "", lines: [], prices: {} });
+  const [draft, setDraft] = useState<ProjectDraft>({ name: "", location: "", floor: "", lines: [], prices: {}, materialSelections: {} });
   const [loadingProject, setLoadingProject] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ tone: "success" | "error"; text: string } | null>(null);
@@ -65,7 +75,7 @@ export function CalculatorPage() {
           location: project.location ?? "",
           floor: project.floor ?? "",
           lines: project.lines,
-          prices: priceMap(project),
+          prices: priceMap(project),\n          materialSelections: materialSelectionMap(project),
         });
         setMessage(null);
       }).catch((error) => {
@@ -107,19 +117,20 @@ export function CalculatorPage() {
   const recap = useMemo(() => aggregateMaterials(
     draft.lines.map((line) => ({
       materials: (results.get(line.id ?? `${line.modelCode}`)?.items ?? []).map((material) => {
-        const detail = line.priceCatalogId ? budgetDetails.get(line.priceCatalogId) : undefined;
-        const mapped = budgetPriceForMaterial(detail, material.materialCode, material.name, material.unit, line.priceVariantId);
-        const variant = detail?.variants.find((item) => item.id === line.priceVariantId);
+        const selection = draft.materialSelections?.[String(material.materialCode)] ?? { catalogId: line.priceCatalogId ?? null, variantId: line.priceVariantId ?? null };
+        const detail = selection.catalogId ? budgetDetails.get(selection.catalogId) : undefined;
+        const variant = detail?.variants.find((item) => item.id === selection.variantId);
+        const mapped = budgetPriceForMaterial(detail, material.materialCode, material.name, material.unit, selection.variantId);
         return {
           ...material,
-          priceKey: detail && variant ? `${detail.catalog.id}:${variant.id}:${material.materialCode}` : `manual:${material.materialCode}`,
-          catalogId: detail && variant ? detail.catalog.id : null,
-          variantId: detail && variant ? variant.id : null,
+          priceKey: mapped?.priceKey ?? (detail && variant ? `${detail.catalog.id}:${variant.id}:${material.materialCode}` : `manual:${material.materialCode}`),
+          catalogId: selection.catalogId,
+          variantId: selection.variantId,
           unitPrice: mapped?.unitPrice ?? null,
           priceVersion: mapped?.priceVersion ?? null,
           expressionSnapshot: mapped?.expressionSnapshot ?? null,
           componentId: mapped?.componentId ?? null,
-          priceSourceLabel: detail && variant ? `${detail.catalog.label} · ${variant.label}` : "Harga manual",
+          priceSourceLabel: mapped?.priceSourceLabel ?? (detail && variant ? `${detail.catalog.label} · ${variant.label}` : "Harga manual"),
         };
       }),
       modelCount: line.count,
@@ -160,7 +171,7 @@ export function CalculatorPage() {
         location: saved.project.location ?? "",
         floor: saved.project.floor ?? "",
         lines: saved.project.lines,
-        prices: priceMap(saved.project),
+        prices: priceMap(saved.project),\n        materialSelections: materialSelectionMap(saved.project),
       });
       setSearchParams(new URLSearchParams({ project: saved.project.id }), { replace: true });
       setMessage({ tone: "success", text: `Perhitungan tersimpan · ${formatRupiah(saved.total)} sementara.` });
@@ -211,10 +222,7 @@ export function CalculatorPage() {
               models={models}
               results={results}
               onChange={updateLine}
-              onRemove={removeLine}
-              budgetCatalogs={budgetCatalogs}
-              budgetDetails={budgetDetails}
-            />
+              onRemove={removeLine}\n            />
           ) : (
             <div className="empty-models"><strong>Belum ada model</strong><p>Tambahkan setidaknya satu model pintu untuk mulai menghitung.</p></div>
           )}
@@ -225,6 +233,12 @@ export function CalculatorPage() {
           <MaterialRecap
             rows={recap}
             total={total}
+            budgetCatalogs={budgetCatalogs}
+            budgetDetails={budgetDetails}
+            onSelectionChange={(materialCode, selection) => setDraft((current) => ({
+              ...current,
+              materialSelections: { ...current.materialSelections, [String(materialCode)]: selection },
+            }))}
             onPriceChange={(priceKey, unitPrice) => setDraft((current) => ({
               ...current,
               prices: unitPrice === undefined
