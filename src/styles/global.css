@@ -750,3 +750,12 @@ h1 { margin: 0; color: var(--ink); font-size: clamp(28px, 3vw, 37px); font-weigh
   .budget-card-actions { grid-column: 2; justify-content: flex-start; }
   .budget-card-actions .secondary-button, .budget-card-actions .formula-danger-button { min-height: 32px; }
 }
+
+/* Let each workbook sheet card use the full available content width. */
+.budget-workbook-list {
+  width: 100%;
+  max-width: none;
+}
+.budget-workbook-tab-card {
+  width: 100%;
+}
