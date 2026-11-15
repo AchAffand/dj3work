@@ -24,6 +24,14 @@ type MaterialRecapProps = {
   onExtraMaterialsChange(items: ProjectExtraMaterial[]): void;
 };
 
+function createMaterialId(): string {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (char) => {
+    const random = Math.floor(Math.random() * 16);
+    return (char === "x" ? random : (random & 0x3) | 0x8).toString(16);
+  });
+}
+
 const familyLabels = {
   aluminium: "ALUMINIUM",
   glass: "KACA",
@@ -120,7 +128,7 @@ export function MaterialRecap({ rows, total, budgetCatalogs, budgetDetails, onSe
                                 const existing = extraMaterials.find((item) => item.name === key);
                                 const next = extraMaterials.filter((item) => item.name !== key);
                                 if (finish) next.push({
-                                  id: existing?.id ?? (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `finish-${row.materialCode}-${Date.now()}`),
+                                  id: existing?.id ?? createMaterialId(),
                                   name: key, unit: finish.unit, quantity: row.quantity, catalogId: detail.catalog.id,
                                   variantId: row.variantId, componentId: finish.id, unitPrice: null,
                                 });
@@ -190,7 +198,7 @@ export function MaterialRecap({ rows, total, budgetCatalogs, budgetDetails, onSe
         <div className="recap-heading">
           <div><p className="eyebrow">KEBUTUHAN TAMBAHAN</p><h3>Material tambahan</h3></div>
           <button className="secondary-button" type="button" onClick={() => onExtraMaterialsChange([...extraMaterials, {
-            id: typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `extra-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+            id: createMaterialId(),
             name: "", unit: "", quantity: 1, catalogId: null, variantId: null, componentId: null, unitPrice: null,
           }])}>＋ Tambah material</button>
         </div>
@@ -213,8 +221,7 @@ export function MaterialRecap({ rows, total, budgetCatalogs, budgetDetails, onSe
                             <span className="sr-only">Kelompok material tambahan</span>
                             <select value={detail?.catalog.slug ?? ""} onChange={(event) => {
                               const slug = event.target.value;
-                              const family = slug === "almunium" ? "aluminium" : slug === "kaca" ? "glass" : slug === "ass" ? "accessory" : "door-leaf";
-                              const catalog = catalogForFamily(family, budgetCatalogs);
+                              const catalog = budgetCatalogs.find((candidate) => candidate.slug === slug);
                               const nextDetail = catalog ? budgetDetails.get(catalog.id) : undefined;
                               update({ catalogId: catalog?.id ?? null, variantId: nextDetail?.variants.length === 1 ? nextDetail.variants[0].id : null, componentId: null, name: "", unit: "", unitPrice: null });
                             }}>
