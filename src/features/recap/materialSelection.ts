@@ -3,11 +3,11 @@ import { isAccessoryMaterial, isGlassMaterial, isDoorLeafMaterial } from "../../
 
 export type MaterialFamily = "aluminium" | "glass" | "accessory" | "door-leaf" | "other";
 
-const normalize = (value: string) => value.normalize("NFKC").trim().replace(/\\s+/g, " ").toLocaleLowerCase("id-ID");
+const normalize = (value: string) => value.normalize("NFKC").trim().replace(/\s+/g, " ").toLocaleLowerCase("id-ID");
 
 export function materialFamily(name: string, unit: string): MaterialFamily {
   const normalizedName = normalize(name);
-  if (/\\b(kusen|aluminium|almunium)\\b/.test(normalizedName)) return "aluminium";
+  if (/\b(kusen|aluminium|almunium)\b/.test(normalizedName)) return "aluminium";
   if (isDoorLeafMaterial({ name, unit }) || /daun pintu|pintu kayu|pintu hdf|pintu wpc|pintu pvc/.test(normalizedName)) return "door-leaf";
   if (isGlassMaterial({ name, unit })) return "glass";
   if (isAccessoryMaterial({ name, unit })) return "accessory";
@@ -60,7 +60,7 @@ export function relatedMaterialComponents(
 ): BudgetComponent[] {
   if (!detail) return [];
   if (family === "aluminium") {
-    return detail.components.filter((component) => /^KUSEN\\s*[34]\\b/i.test(component.label));
+    return detail.components.filter((component) => /^KUSEN\s*[34]\b/i.test(component.label));
   }
   const category = family === "glass" ? "Kaca" : family === "accessory" ? "Aksesori" : family === "door-leaf" ? "Daun Pintu" : "";
   const candidates = detail.components
@@ -68,7 +68,7 @@ export function relatedMaterialComponents(
     .sort((a, b) => a.position - b.position);
   if (family !== "accessory") return candidates;
 
-  const needle = normalize(materialName).replace(/\\b(pcs|set|unit|m2|m')\\b/g, "").trim();
+  const needle = normalize(materialName).replace(/\b(pcs|set|unit|m2|m')\b/g, "").trim();
   const matches = candidates.filter((component) => {
     const label = normalize(component.label);
     return label.includes(needle) || needle.includes(label);
@@ -77,5 +77,5 @@ export function relatedMaterialComponents(
 }
 
 export function componentLabel(component: BudgetComponent): string {
-  return component.label.replace(/\\s*\\/\\s*(m2|m')\\s*$/i, "").trim();
+  return component.label.replace(/\s*\/\s*(m2|m')\s*$/i, "").trim();
 }
