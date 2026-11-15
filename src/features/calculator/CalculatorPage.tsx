@@ -140,7 +140,7 @@ export function CalculatorPage() {
           ...material,
           priceKey: mapped?.priceKey ?? (detail && variant && resolvedSelection.componentId ? `${detail.catalog.id}:${variant.id}:${material.materialCode}:${resolvedSelection.componentId}` : `manual:${material.materialCode}`),
           catalogId: selection.catalogId,
-          variantId: selection.variantId,
+          variantId: resolvedSelection.variantId,
           unitPrice: mapped?.unitPrice ?? null,
           priceVersion: mapped?.priceVersion ?? null,
           expressionSnapshot: mapped?.expressionSnapshot ?? null,
