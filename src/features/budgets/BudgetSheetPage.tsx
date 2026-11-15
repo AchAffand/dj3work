@@ -184,9 +184,10 @@ export function BudgetSheetPage() {
           <h1>{detail.catalog.label}</h1>
           <p className="page-description">Lembar harga mengikuti susunan workbook Excel. Klik sel harga untuk mengubah nilainya.</p>
         </div>
-        <div className="budget-sheet-heading-actions">
-          <button className="budget-back-button" type="button" onClick={() => navigate("/master-harga")}>
-            <span aria-hidden="true">←</span> Kembali
+        <div className="sheet-header-controls">
+          <button className="sheet-return-control" type="button" onClick={() => navigate("/master-harga")}>
+            <span aria-hidden="true">←</span>
+            <span>Kembali</span>
           </button>
           {isCatalogAdmin && <button className="primary-button" type="button" onClick={() => {
             setComponentDraft({ label: "", unit: "pcs", groupLabel: sectionOptions[0] ?? "" });
