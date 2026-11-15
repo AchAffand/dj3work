@@ -12,6 +12,8 @@ function makeClient(
     eq: vi.fn(() => query),
     order: vi.fn(() => resolved(rows)),
     maybeSingle: vi.fn(() => resolved(single)),
+    delete: vi.fn(() => ({ eq: vi.fn(() => resolved(null)) })),
+    insert: vi.fn((payload: unknown) => resolved(payload)),
   };
   const client = {
     from: vi.fn(() => query),
@@ -142,6 +144,30 @@ describe("Supabase repository", () => {
       p_price_snapshots: [],
       p_project_id: null,
     }));
+  });
+
+  it("persists standalone extra materials as project-owned rows", async () => {
+    const { client, query } = makeClient();
+    const repository = createSupabaseRepository(client);
+    await repository.saveProject({
+      name: "Rumah contoh",
+      lines: [{
+        modelCode: 10100, inputs: { T1: 2000, L1: 1754 }, count: 1,
+        formulaSnapshot: [], resultSnapshot: { items: [], errors: [] },
+      }],
+      prices: [],
+      extraMaterials: [{
+        id: "4f3c6c08-4bd0-4c5f-9a33-8f59eabbb001",
+        name: "HANDLE + KUNCI", unit: "SET", quantity: 2,
+        catalogId: "accessory-catalog", variantId: "default-variant",
+        componentId: "handle-component", unitPrice: 125000,
+      }],
+    });
+    expect(client.from).toHaveBeenCalledWith("project_extra_materials");
+    expect(query.insert).toHaveBeenCalledWith([expect.objectContaining({
+      project_id: "project-1", name_snapshot: "HANDLE + KUNCI",
+      quantity: 2, component_id: "handle-component", unit_price: 125000,
+    })]);
   });
 
   it("loads the saved project location and floor fields", async () => {
