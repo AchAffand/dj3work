@@ -83,7 +83,7 @@ export function CalculatorPage() {
         setMessage({ tone: "error", text: error instanceof Error ? error.message : "Proyek tidak dapat dibuka." });
       }).finally(() => setLoadingProject(false));
     } else {
-      setDraft({ name: "", location: "", floor: "", lines: models.length ? [makeLine(models[0].code)] : [], prices: {} });
+      setDraft({ name: "", location: "", floor: "", lines: models.length ? [makeLine(models[0].code)] : [], prices: {}, materialSelections: {} });
       setMessage(null);
     }
   }, [catalogError, loadingCatalog, models, projectId, projectService, repository, routeKey]);
@@ -137,7 +137,7 @@ export function CalculatorPage() {
       modelCount: line.count,
     })),
     draft.prices,
-  ), [budgetDetails, draft.lines, draft.prices, results]);
+  ), [budgetDetails, draft.lines, draft.materialSelections, draft.prices, results]);
   const total = recap.reduce((sum, row) => sum + (row.subtotal ?? 0), 0);
 
   const updateLine = useCallback((lineId: string, updated: ProjectLineDraft) => {
