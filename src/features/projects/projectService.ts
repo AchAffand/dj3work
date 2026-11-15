@@ -5,6 +5,8 @@ import type { ExpressionNode } from "../../domain/formulas/ast";
 import type { Project, ProjectFormulaSnapshot, ProjectInput, ProjectModelLineInput, ProjectPriceInput } from "../../domain/projects/types";
 import { aggregateMaterials, type MaterialRecapRow } from "../recap/aggregateMaterials";
 
+export type MaterialSelection = { catalogId: string | null; variantId: string | null };
+
 export type ProjectLineDraft = {
   id?: string;
   modelCode: number;
@@ -23,6 +25,7 @@ export type ProjectDraft = {
   floor?: string;
   lines: ProjectLineDraft[];
   prices: Readonly<Record<string, number | null | undefined>>;
+  materialSelections?: Readonly<Record<string, MaterialSelection>>;
   recap?: readonly MaterialRecapRow[];
 };
 
