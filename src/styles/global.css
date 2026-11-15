@@ -796,3 +796,63 @@ h1 { margin: 0; color: var(--ink); font-size: clamp(28px, 3vw, 37px); font-weigh
     width: auto;
   }
 }
+
+/* Permanent-delete confirmation: keep both actions aligned and visually distinct. */
+.formula-confirm-actions {
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-end;
+  gap: 9px;
+}
+.formula-confirm-actions > .secondary-button,
+.formula-confirm-actions > .primary-button {
+  box-sizing: border-box;
+  display: inline-flex;
+  flex: 0 0 auto;
+  min-width: 112px;
+  min-height: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin: 0;
+  padding: 0 14px;
+  border-radius: 7px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+.formula-confirm-actions > .primary-button.formula-danger-button {
+  min-width: 156px;
+  border: 1px solid #B42318;
+  background: #B42318;
+  color: #FFFFFF;
+}
+.formula-confirm-actions > .primary-button.formula-danger-button:hover:not(:disabled) {
+  border-color: #912018;
+  background: #912018;
+}
+.formula-confirm-actions > .primary-button.formula-danger-button:disabled,
+.formula-confirm-actions > .secondary-button:disabled {
+  cursor: wait;
+  opacity: .6;
+}
+.formula-confirm-actions .formula-toast-spinner {
+  flex: 0 0 12px;
+}
+@media (max-width: 420px) {
+  .formula-confirm-actions {
+    gap: 7px;
+  }
+  .formula-confirm-actions > .secondary-button,
+  .formula-confirm-actions > .primary-button {
+    min-width: 0;
+    flex: 1 1 0;
+    padding: 0 8px;
+  }
+  .formula-confirm-actions > .primary-button.formula-danger-button {
+    min-width: 0;
+  }
+}
+
