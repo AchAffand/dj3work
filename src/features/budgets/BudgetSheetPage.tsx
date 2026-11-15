@@ -185,7 +185,7 @@ export function BudgetSheetPage() {
           <p className="page-description">Lembar harga mengikuti susunan workbook Excel. Klik sel harga untuk mengubah nilainya.</p>
         </div>
         <div className="sheet-header-controls">
-          <button className="sheet-return-control" type="button" onClick={() => navigate("/master-harga")}>
+          <button className="primary-button sheet-return-control" type="button" onClick={() => navigate("/master-harga")}>
             <span aria-hidden="true">←</span>
             <span>Kembali</span>
           </button>
