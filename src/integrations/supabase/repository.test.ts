@@ -9,6 +9,7 @@ function makeClient(
   const resolved = (data: unknown) => Promise.resolve({ data, error: null });
   const query = {
     select: vi.fn(() => query),
+    delete: vi.fn(() => query),
     eq: vi.fn(() => query),
     order: vi.fn(() => resolved(rows)),
     maybeSingle: vi.fn(() => resolved(single)),
@@ -71,6 +72,29 @@ describe("Supabase repository", () => {
     expect(model.materials[0]).toMatchObject({ code: 34204, sourceCode: 34104, name: "coak" });
   });
 
+  it("keeps archived models available for saved project history while marking them inactive", async () => {
+    const { client } = makeClient([{
+      code: 10100,
+      group_code: 10000,
+      name: "Model lama",
+      input_variables: ["T1"],
+      status: "ready",
+      is_active: false,
+      model_materials: [{
+        material_code: 10101,
+        current_expression: "T1/1000",
+        formula_version: 1,
+        source_cell: "L2",
+        source_formula: null,
+        source_cached_quantity: null,
+        materials: { name: "kusen", unit: "m'" },
+      }],
+    }]);
+    const models = await createSupabaseRepository(client).listModels();
+    expect(models).toHaveLength(1);
+    expect(models[0]).toMatchObject({ code: 10100, active: false });
+  });
+
   it("derives readiness from current formulas instead of the imported status", async () => {
     const { client } = makeClient([{
       code: 30100,
@@ -115,6 +139,36 @@ describe("Supabase repository", () => {
     expect(client.from).toHaveBeenCalledWith("projects");
     expect(query.eq).toHaveBeenCalledWith("id", "foreign-project");
     expect(query.maybeSingle).toHaveBeenCalledOnce();
+  });
+
+  it("includes the creator profile in the saved project list", async () => {
+    const projectRows = [{
+      id: "project-1",
+      name: "Rumah Contoh",
+      user_id: "user-1",
+      created_at: "2026-09-25T00:00:00.000Z",
+      updated_at: "2026-10-01T00:00:00.000Z",
+      project_model_lines: [{ model_code: 10100, model_count: 2 }],
+    }];
+    const profileRows = [{ id: "user-1", display_name: "Admin DJ3", email: "admin@dj3.local" }];
+    const projectQuery = {
+      select: vi.fn(() => projectQuery),
+      order: vi.fn(() => Promise.resolve({ data: projectRows, error: null })),
+    };
+    const profileQuery = {
+      select: vi.fn(() => profileQuery),
+      in: vi.fn(() => Promise.resolve({ data: profileRows, error: null })),
+    };
+    const client = {
+      from: vi.fn((table: string) => table === "profiles" ? profileQuery : projectQuery),
+      rpc: vi.fn(() => Promise.resolve({ data: "project-1", error: null })),
+      auth: { getUser: vi.fn(() => Promise.resolve({ data: { user: { id: "user-1" } }, error: null })) },
+    } as unknown as SupabaseClient;
+    const projects = await createSupabaseRepository(client).listProjects();
+    expect(projects[0]).toMatchObject({ id: "project-1", createdBy: "Admin DJ3", createdAt: "2026-09-25T00:00:00.000Z", modelCount: 1 });
+    expect(client.from).toHaveBeenNthCalledWith(1, "projects");
+    expect(client.from).toHaveBeenNthCalledWith(2, "profiles");
+    expect(profileQuery.in).toHaveBeenCalledWith("id", ["user-1"]);
   });
 
   it("saves stable project model and material codes through the atomic database function", async () => {
@@ -175,4 +229,19 @@ describe("Supabase repository", () => {
     expect(query.select).toHaveBeenCalledWith("user_id");
     expect(query.eq).toHaveBeenCalledWith("user_id", "user-1");
   });
+  it("deletes only the requested project through the owner-scoped table policy", async () => {
+    const { client, query } = makeClient([], { id: "project-1" });
+    await createSupabaseRepository(client).deleteProject("project-1");
+    expect(client.from).toHaveBeenCalledWith("projects");
+    expect(query.delete).toHaveBeenCalledOnce();
+    expect(query.eq).toHaveBeenCalledWith("id", "project-1");
+    expect(query.select).toHaveBeenCalledWith("id");
+  });
+
+  it("archives a formula model through the guarded database function", async () => {
+    const { client } = makeClient();
+    await createSupabaseRepository(client).archiveFormulaModel(10100);
+    expect(client.rpc).toHaveBeenCalledWith("archive_formula_model", { p_model_code: 10100 });
+  });
+
 });
