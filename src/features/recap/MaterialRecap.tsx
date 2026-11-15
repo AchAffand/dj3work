@@ -75,7 +75,7 @@ export function MaterialRecap({ rows, total, budgetCatalogs, budgetDetails, onSe
                           <div className="recap-select-pair">
                             <label className="recap-select-field">
                               <span className="sr-only">Merek aluminium</span>
-                              <select value={selectedVariant ? aluminiumBrands(detail).find((brand) => aluminiumVariantId(detail, brand, selectedVariant.label.split("·").slice(1).join("·").trim())) ?? selectedVariant.label.split("·")[0]?.trim() : ""} onChange={(event) => {
+                              <select value={selectedVariant ? selectedVariant.label.split("·")[0]?.trim() : ""} onChange={(event) => {
                                 const brand = event.target.value;
                                 const finish = aluminiumFinishes(detail, brand)[0] ?? "";
                                 selection({ variantId: aluminiumVariantId(detail, brand, finish) });
