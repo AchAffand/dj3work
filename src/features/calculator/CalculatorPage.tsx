@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import type { Project } from "../../domain/projects/types";
+import type { Project, ProjectExtraMaterial } from "../../domain/projects/types";
 import { calculateModel } from "../../domain/formulas/calculateModel";
 import { AppPageState } from "../../app/AppPageState";
 import { formatRupiah } from "../../app/format";
@@ -52,7 +52,7 @@ export function CalculatorPage() {
   );
   const routeKey = projectId ?? "new";
   const hydratedRoute = useRef<string | null>(null);
-  const [draft, setDraft] = useState<ProjectDraft>({ name: "", location: "", floor: "", lines: [], prices: {}, materialSelections: {} });
+  const [draft, setDraft] = useState<ProjectDraft>({ name: "", location: "", floor: "", lines: [], prices: {}, materialSelections: {}, extraMaterials: [] });
   const [loadingProject, setLoadingProject] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ tone: "success" | "error"; text: string } | null>(null);
@@ -67,7 +67,7 @@ export function CalculatorPage() {
       void projectService.loadProject(projectId).then((project) => {
         if (!project) {
           setMessage({ tone: "error", text: "Proyek tidak ditemukan atau tidak dapat dibuka." });
-          setDraft({ name: "", location: "", floor: "", lines: models.length ? [makeLine(models[0].code)] : [], prices: {}, materialSelections: {} });
+          setDraft({ name: "", location: "", floor: "", lines: models.length ? [makeLine(models[0].code)] : [], prices: {}, materialSelections: {}, extraMaterials: [] });
           return;
         }
         setDraft({
@@ -78,6 +78,7 @@ export function CalculatorPage() {
           lines: project.lines,
           prices: priceMap(project),
           materialSelections: materialSelectionMap(project),
+          extraMaterials: project.extraMaterials ?? [],
         });
         setMessage(null);
       }).catch((error) => {
@@ -152,7 +153,14 @@ export function CalculatorPage() {
     })),
     draft.prices,
   ), [budgetDetails, draft.lines, draft.materialSelections, draft.prices, results]);
-  const total = recap.reduce((sum, row) => sum + (row.subtotal ?? 0), 0);
+  const extraMaterials = (draft.extraMaterials ?? []) as ProjectExtraMaterial[];
+  const pricedExtraMaterials = extraMaterials.map((item, index) => {
+    const detail = item.catalogId ? budgetDetails.get(item.catalogId) : undefined;
+    const price = budgetPriceForMaterial(detail, -100000 - index, item.name, item.unit, item.variantId, null, null, null, null, null, item.componentId);
+    return { ...item, unitPrice: price?.unitPrice ?? item.unitPrice, priceVersion: price?.priceVersion ?? item.priceVersion ?? null, expressionSnapshot: price?.expressionSnapshot ?? item.expressionSnapshot ?? null };
+  });
+  const total = recap.reduce((sum, row) => sum + (row.subtotal ?? 0), 0)
+    + pricedExtraMaterials.reduce((sum, item) => sum + (item.unitPrice === null ? 0 : item.quantity * item.unitPrice), 0);
 
   const updateLine = useCallback((lineId: string, updated: ProjectLineDraft) => {
     setDraft((current) => ({
@@ -179,7 +187,7 @@ export function CalculatorPage() {
     setSaving(true);
     setMessage(null);
     try {
-      const saved = await projectService.saveProject({ ...draft, recap });
+      const saved = await projectService.saveProject({ ...draft, recap, extraMaterials: pricedExtraMaterials });
       setDraft({
         id: saved.project.id,
         name: saved.project.name,
@@ -188,6 +196,7 @@ export function CalculatorPage() {
         lines: saved.project.lines,
         prices: priceMap(saved.project),
         materialSelections: materialSelectionMap(saved.project),
+        extraMaterials: saved.project.extraMaterials ?? [],
       });
       setSearchParams(new URLSearchParams({ project: saved.project.id }), { replace: true });
       setMessage({ tone: "success", text: `Perhitungan tersimpan · ${formatRupiah(saved.total)} sementara.` });
@@ -250,6 +259,8 @@ export function CalculatorPage() {
           <MaterialRecap
             rows={recap}
             total={total}
+            extraMaterials={pricedExtraMaterials}
+            onExtraMaterialsChange={(items) => setDraft((current) => ({ ...current, extraMaterials: items }))}
             budgetCatalogs={budgetCatalogs}
             budgetDetails={budgetDetails}
             onSelectionChange={(materialCode, selection) => setDraft((current) => ({
