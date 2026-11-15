@@ -1,6 +1,7 @@
 import { formatQuantity, formatRupiah } from "../../app/format";
 import type { BudgetCatalog, BudgetCatalogDetail } from "../../domain/budgets/types";
 import type { MaterialSelection } from "../projects/projectService";
+import type { ProjectExtraMaterial } from "../../domain/projects/types";
 import type { MaterialRecapRow } from "./aggregateMaterials";
 import {
   aluminiumBrands,
@@ -19,6 +20,8 @@ type MaterialRecapProps = {
   budgetDetails: ReadonlyMap<string, BudgetCatalogDetail>;
   onSelectionChange(materialCode: number, selection: MaterialSelection): void;
   onPriceChange(priceKey: string, unitPrice: number | undefined): void;
+  extraMaterials: readonly ProjectExtraMaterial[];
+  onExtraMaterialsChange(items: ProjectExtraMaterial[]): void;
 };
 
 const familyLabels = {
@@ -28,7 +31,7 @@ const familyLabels = {
   "door-leaf": "DAUN PINTU",
 } as const;
 
-export function MaterialRecap({ rows, total, budgetCatalogs, budgetDetails, onSelectionChange, onPriceChange }: MaterialRecapProps) {
+export function MaterialRecap({ rows, total, budgetCatalogs, budgetDetails, onSelectionChange, onPriceChange, extraMaterials, onExtraMaterialsChange }: MaterialRecapProps) {
   const missingPrices = rows.filter((row) => row.unitPrice === null).length;
   return (
     <section className="recap-card">
@@ -158,6 +161,79 @@ export function MaterialRecap({ rows, total, budgetCatalogs, budgetDetails, onSe
           </table>
         </div>
       )}
+      <section className="recap-extra-section">
+        <div className="recap-heading">
+          <div><p className="eyebrow">KEBUTUHAN TAMBAHAN</p><h3>Material tambahan</h3></div>
+          <button className="secondary-button" type="button" onClick={() => onExtraMaterialsChange([...extraMaterials, {
+            id: typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `extra-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+            name: "", unit: "", quantity: 1, catalogId: null, variantId: null, componentId: null, unitPrice: null,
+          }])}>＋ Tambah material</button>
+        </div>
+        {extraMaterials.length > 0 && (
+          <div className="recap-table-wrap">
+            <table className="recap-table">
+              <thead><tr><th>Kelompok & material</th><th>Qty</th><th>Varian</th><th>Harga satuan</th><th>Subtotal</th><th></th></tr></thead>
+              <tbody>
+                {extraMaterials.map((item) => {
+                  const detail = item.catalogId ? budgetDetails.get(item.catalogId) : undefined;
+                  const selectedComponent = detail?.components.find((component) => component.id === item.componentId);
+                  const selectedVariant = detail?.variants.find((variant) => variant.id === item.variantId);
+                  const update = (patch: Partial<ProjectExtraMaterial>) => onExtraMaterialsChange(extraMaterials.map((current) => current.id === item.id ? { ...current, ...patch } : current));
+                  const subtotal = item.unitPrice === null ? null : item.quantity * item.unitPrice;
+                  return (
+                    <tr key={item.id}>
+                      <td>
+                        <div className="recap-selection-stack">
+                          <label className="recap-select-field">
+                            <span className="sr-only">Kelompok material tambahan</span>
+                            <select value={detail?.catalog.slug ?? ""} onChange={(event) => {
+                              const family = event.target.value as "aluminium" | "glass" | "accessory" | "door-leaf";
+                              const catalog = catalogForFamily(family, budgetCatalogs);
+                              const nextDetail = catalog ? budgetDetails.get(catalog.id) : undefined;
+                              update({ catalogId: catalog?.id ?? null, variantId: nextDetail?.variants.length === 1 ? nextDetail.variants[0].id : null, componentId: null, name: "", unit: "", unitPrice: null });
+                            }}>
+                              <option value="">Pilih kelompok</option>
+                              <option value="almunium">Aluminium</option>
+                              <option value="kaca">Kaca</option>
+                              <option value="ass">Aksesori</option>
+                              <option value="daun-pintu">Daun pintu</option>
+                            </select>
+                          </label>
+                          {detail && (
+                            <label className="recap-select-field">
+                              <span className="sr-only">Pilih komponen tambahan</span>
+                              <select value={item.componentId ?? ""} onChange={(event) => {
+                                const component = detail.components.find((candidate) => candidate.id === event.target.value);
+                                update({ componentId: component?.id ?? null, name: component?.label ?? "", unit: component?.unit ?? "", unitPrice: null });
+                              }}>
+                                <option value="">Pilih item</option>
+                                {detail.components.map((component) => <option key={component.id} value={component.id}>{componentLabel(component)}</option>)}
+                              </select>
+                            </label>
+                          )}
+                          {selectedComponent && <small>{selectedComponent.category} · {selectedComponent.unit}</small>}
+                        </div>
+                      </td>
+                      <td><input className="recap-extra-quantity" type="number" min="0.0001" step="any" value={item.quantity} onChange={(event) => update({ quantity: Math.max(0.0001, Number(event.target.value) || 0.0001) })} /></td>
+                      <td>
+                        {detail && detail.variants.length > 1 ? (
+                          <select value={item.variantId ?? ""} onChange={(event) => update({ variantId: event.target.value || null, unitPrice: null })}>
+                            <option value="">Pilih varian</option>
+                            {detail.variants.map((variant) => <option key={variant.id} value={variant.id}>{variant.label}</option>)}
+                          </select>
+                        ) : <span>{selectedVariant?.label ?? (detail?.variants.length === 1 ? detail.variants[0].label : "—")}</span>}
+                      </td>
+                      <td>{item.unitPrice === null ? <span className="unpriced-label">Pilih spesifikasi</span> : formatRupiah(item.unitPrice)}</td>
+                      <td className="recap-subtotal">{subtotal === null ? "—" : formatRupiah(subtotal)}</td>
+                      <td><button className="secondary-button" type="button" aria-label={`Hapus ${item.name || "material tambahan"}`} onClick={() => onExtraMaterialsChange(extraMaterials.filter((current) => current.id !== item.id))}>Hapus</button></td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
       <div className="recap-total-row">
         <div><strong>Total sementara</strong>{missingPrices > 0 && <span>{missingPrices} harga satuan belum diisi</span>}</div>
         <strong className="grand-total">{formatRupiah(total)}</strong>
