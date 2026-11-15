@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - "sync/**"
+      - "feature/**"
   workflow_dispatch:
 
 permissions:
