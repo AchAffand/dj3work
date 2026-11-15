@@ -42,7 +42,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </aside>
       {mobileMenuOpen && (
         <>
-          <button className="mobile-nav-backdrop" type="button" aria-label="Tutup menu navigasi" onClick={() => setMobileMenuOpen(false)} />
+          <button className="mobile-nav-backdrop" type="button" aria-label="Tutup latar menu navigasi" onClick={() => setMobileMenuOpen(false)} />
           <aside className="mobile-nav-drawer" aria-label="Menu navigasi mobile">
             <div className="mobile-nav-heading">
               <BrandLogo />
