@@ -34,6 +34,11 @@ const project: Project = {
     { materialCode: 10101, name: "Kusen", unit: "m'", unitPrice: 50000 },
     { materialCode: 10102, name: "Tapin", unit: "m'", unitPrice: null },
   ],
+  extraMaterials: [{
+    id: "4f3c6c08-4bd0-4c5f-9a33-8f59eabbb001",
+    name: "HANDLE + KUNCI", unit: "SET", quantity: 2,
+    catalogId: null, variantId: null, componentId: "handle-lock", unitPrice: 125000,
+  }],
 };
 
 describe("ProjectPrintPage", () => {
@@ -67,6 +72,8 @@ describe("ProjectPrintPage", () => {
     expect(screen.getByText("2", { selector: "dd" })).toBeInTheDocument();
     expect(screen.getByText("Tgl:", { exact: false })).toBeInTheDocument();
     expect(screen.getByText("10101 · Harga manual")).toBeInTheDocument();
+    expect(screen.getByText("HANDLE + KUNCI")).toBeInTheDocument();
+    expect(screen.getByText("MATERIAL TAMBAHAN")).toBeInTheDocument();
     for (const heading of ["TYPE", "ITEM", "QTY", "HARG SAT", "SATUAN", "SUB TOTAL", "GRAND TOTAL"]) {
       expect(screen.getByRole("columnheader", { name: heading })).toBeInTheDocument();
     }
@@ -78,7 +85,8 @@ describe("ProjectPrintPage", () => {
     expect(document.querySelector(".grand-total-spacer")).toHaveClass("grand-total-spacer");
     expect(document.querySelector(".grand-total-merged")).toHaveClass("grand-total-merged");
     expect(document.querySelector(".grand-total-value")).toBeInTheDocument();
-    expect(screen.getAllByText(/Rp\s*575\.400/)).toHaveLength(2);
+    expect(screen.getByText(/Rp\s*575\.400/)).toBeInTheDocument();
+    expect(screen.getByText(/Rp\s*825\.400/)).toBeInTheDocument();
     await userEvent.setup().click(screen.getByRole("button", { name: "Cetak / Simpan PDF" }));
     expect(window.print).toHaveBeenCalledOnce();
   });

@@ -2,7 +2,7 @@ import type { DoorModel, InputVariables } from "../../domain/catalog/types";
 import { calculateModel } from "../../domain/formulas/calculateModel";
 import { parseFormula } from "../../domain/formulas/parser";
 import type { ExpressionNode } from "../../domain/formulas/ast";
-import type { Project, ProjectFormulaSnapshot, ProjectInput, ProjectModelLineInput, ProjectPriceInput } from "../../domain/projects/types";
+import type { Project, ProjectFormulaSnapshot, ProjectInput, ProjectModelLineInput, ProjectPriceInput, ProjectExtraMaterial } from "../../domain/projects/types";
 import { aggregateMaterials, type MaterialRecapRow } from "../recap/aggregateMaterials";
 
 export type MaterialSelection = { catalogId: string | null; variantId: string | null; componentId?: string | null };
@@ -27,6 +27,7 @@ export type ProjectDraft = {
   prices: Readonly<Record<string, number | null | undefined>>;
   materialSelections?: Readonly<Record<string, MaterialSelection>>;
   recap?: readonly MaterialRecapRow[];
+  extraMaterials?: ProjectExtraMaterial[];
 };
 
 type ProjectRepository = {
@@ -146,13 +147,16 @@ export function createProjectService(
         floor: draft.floor?.trim() ?? "",
         lines,
         prices,
+        extraMaterials: draft.extraMaterials ?? [],
       };
       const project = await repository.saveProject(input);
       return {
         project,
         recap,
-        total: recap.reduce((sum, row) => sum + (row.subtotal ?? 0), 0),
-        missingPriceCount: recap.filter((row) => row.unitPrice === null).length,
+        total: recap.reduce((sum, row) => sum + (row.subtotal ?? 0), 0)
+          + (draft.extraMaterials ?? []).reduce((sum, item) => sum + (item.unitPrice === null ? 0 : item.quantity * item.unitPrice), 0),
+        missingPriceCount: recap.filter((row) => row.unitPrice === null).length
+          + (draft.extraMaterials ?? []).filter((item) => item.unitPrice === null).length,
       };
     },
   };

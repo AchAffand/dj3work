@@ -73,12 +73,15 @@ export function relatedMaterialComponents(
   const candidates = detail.components
     .filter((component) => normalize(component.category) === normalize(category))
     .sort((a, b) => a.position - b.position);
+  if (family === "door-leaf") return candidates.filter((component) => !/melamin|finishing duco/i.test(component.label));
   if (family !== "accessory") return candidates;
 
-  const needle = normalize(materialName).replace(/\b(pcs|set|unit|m2|m')\b/g, "").trim();
+  const normalizedMaterial = normalize(materialName);
+  const aliases = /silicone|silicon|sealant/.test(normalizedMaterial) ? ["sealant"] : [];
+  const needle = normalizedMaterial.replace(/\b(pcs|set|unit|m2|m')\b/g, "").trim();
   const matches = candidates.filter((component) => {
     const label = normalize(component.label);
-    return label.includes(needle) || needle.includes(label);
+    return aliases.length ? aliases.some((alias) => label.includes(alias)) : label.includes(needle) || needle.includes(label);
   });
   return matches.length ? matches : candidates;
 }

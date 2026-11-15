@@ -81,7 +81,7 @@ export function ProjectPrintPage() {
         });
       }
     }
-    return [...materialTotals.values()]
+    const modelRows = [...materialTotals.values()]
       .sort((left, right) => left.groupCode - right.groupCode || left.materialCode - right.materialCode)
       .map((row) => {
         const unitPrice = row.unitPrice;
@@ -91,6 +91,28 @@ export function ProjectPrintPage() {
           subtotal: unitPrice === null ? null : Math.round(row.quantity * unitPrice * 100) / 100,
         };
       });
+    const extraRows = (project.extraMaterials ?? [])
+      .filter((item) => item.name.trim() && item.componentId)
+      .map((item, index) => {
+        const detail = item.catalogId ? budgetDetails?.get(item.catalogId) : undefined;
+        const component = detail?.components.find((candidate) => candidate.id === item.componentId);
+        const variant = detail?.variants.find((candidate) => candidate.id === item.variantId);
+        const isDoorFinish = item.name.startsWith("__door_finish__:");
+        const name = isDoorFinish ? `Finishing daun pintu · ${component?.label ?? "Finishing"}` : item.name;
+        return {
+          groupCode: Number.MAX_SAFE_INTEGER,
+          type: "MATERIAL TAMBAHAN",
+          materialCode: -index - 1,
+          name,
+          unit: item.unit,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          priceSource: `${catalogNames.get(item.catalogId ?? "") ?? "Master Harga"}${variant ? ` · ${variant.label}` : ""}`,
+          modelCodes: [] as number[],
+          subtotal: item.unitPrice === null ? null : Math.round(item.quantity * item.unitPrice * 100) / 100,
+        };
+      });
+    return [...modelRows, ...extraRows];
   }, [budgetCatalogs, budgetDetails, catalog, project]);
   const total = recap.reduce((sum, row) => sum + (row.subtotal ?? 0), 0);
   const missingPriceCount = recap.filter((row) => row.unitPrice === null).length;

@@ -66,7 +66,7 @@ export function isAccessoryMaterial(material: { name: string; unit?: string }): 
   const name = canonicalMaterialName(material.name);
   const unit = (material.unit ?? "").normalize("NFKC").trim().toLocaleLowerCase("id-ID");
   if (name === "handle" && !["pcs", "set"].includes(unit)) return false;
-  return /rambuncis|engsel|handel|handle|kunci sliding|kunci folding|kunci ra|flushbolt|bracket|rell sliding|rel sliding|roda (?:sliding|atas|bawah)|doorcloser/.test(name);
+  return /silicone|silicon|sealant|rambuncis|engsel|handel|handle|kunci sliding|kunci folding|kunci ra|flushbolt|bracket|rell sliding|rel sliding|roda (?:sliding|atas|bawah)|doorcloser/.test(name);
 }
 
 export function glassPriceOptions(detail: BudgetCatalogDetail | undefined) {
