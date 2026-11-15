@@ -66,9 +66,9 @@ export function MaterialRecap({ rows, total, budgetCatalogs, budgetDetails, onSe
                         <div className="recap-selection-stack">
                           <span className="recap-family-tag">ALUMINIUM</span>
                           <label className="recap-select-field">
-                            <span className="sr-only">Ukuran profil kusen {row.name}</span>
+                            <span className="sr-only">{/\\bkusen\\b/i.test(row.name) ? "Ukuran profil kusen" : "Komponen aluminium"} {row.name}</span>
                             <select value={row.componentId ?? ""} onChange={(event) => selection({ componentId: event.target.value || null })}>
-                              <option value="">Pilih profil kusen</option>
+                              <option value="">{/\\bkusen\\b/i.test(row.name) ? "Pilih profil kusen" : "Pilih komponen aluminium"}</option>
                               {components.map((component) => <option key={component.id} value={component.id}>{componentLabel(component)}</option>)}
                             </select>
                           </label>
