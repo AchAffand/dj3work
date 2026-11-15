@@ -7,7 +7,7 @@ const normalize = (value: string) => value.normalize("NFKC").trim().replace(/\s+
 
 export function materialFamily(name: string, unit: string): MaterialFamily {
   const normalizedName = normalize(name);
-  if (/\b(kusen|aluminium|almunium)\b/.test(normalizedName)) return "aluminium";
+  if (/\b(kusen|aluminium|almunium|hollow|tapin|tatapan|louver|spandrell|canal)\b/.test(normalizedName) || (normalizedName === "pintu" && normalize(unit) === "m'")) return "aluminium";
   if (isDoorLeafMaterial({ name, unit }) || /daun pintu|pintu kayu|pintu hdf|pintu wpc|pintu pvc/.test(normalizedName) || (normalizedName === "pintu" && ["set", "unit", "daun"].includes(normalize(unit)))) return "door-leaf";
   if (isGlassMaterial({ name, unit })) return "glass";
   if (isAccessoryMaterial({ name, unit })) return "accessory";
@@ -61,7 +61,13 @@ export function relatedMaterialComponents(
 ): BudgetComponent[] {
   if (!detail) return [];
   if (family === "aluminium") {
-    return detail.components.filter((component) => /^KUSEN\s*[34]\b/i.test(component.label));
+    if (/\bkusen\b/i.test(materialName)) {
+      return detail.components.filter((component) => /^KUSEN\s*[34]\b/i.test(component.label));
+    }
+    const needle = normalize(materialName);
+    const candidates = detail.components.filter((component) => normalize(component.category) === "material");
+    const matches = candidates.filter((component) => normalize(component.label).includes(needle));
+    return matches.length ? matches : candidates;
   }
   const category = family === "glass" ? "Kaca" : family === "accessory" ? "Aksesori" : family === "door-leaf" ? "Daun Pintu" : "";
   const candidates = detail.components
