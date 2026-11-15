@@ -46,6 +46,22 @@ describe("relational material selection", () => {
     expect(aluminiumVariantId(aluminiumDetail, "HPM", "BROWN/ANODIZE")).toBe("hpm-brown");
   });
 
+  it("routes silicone to the sealant accessory component instead of showing every accessory", () => {
+    const accessoryCatalog: BudgetCatalog = { id: "accessory", slug: "ass", label: "AKSESORIS", position: 3, active: true };
+    const accessoryDetail: BudgetCatalogDetail = {
+      catalog: accessoryCatalog,
+      variants: [{ id: "default", key: "default", label: "HARGA 2026", position: 1 }],
+      components: [
+        { id: "sealant", key: "sealant", sourceColumn: "A", label: "SEALANT / M'", unit: "M'", category: "Aksesori", position: 1, prices: {} },
+        { id: "handle", key: "handle", sourceColumn: "B", label: "HANDLE + KUNCI", unit: "SET", category: "Aksesori", position: 2, prices: {} },
+      ],
+      rules: [], mappings: [],
+    };
+    expect(materialFamily("Silicone", "M'")).toBe("accessory");
+    expect(relatedMaterialComponents(accessoryDetail, "accessory", "Silicone").map((item) => item.id)).toEqual(["sealant"]);
+    expect(relatedMaterialComponents(accessoryDetail, "accessory", "Handle + Kunci").map((item) => item.id)).toEqual(["handle"]);
+  });
+
   it("routes glass, accessory and door-leaf rows to their own families", () => {
     expect(materialFamily("Kaca", "M2")).toBe("glass");
     expect(materialFamily("Engsel Kupu", "pcs")).toBe("accessory");
