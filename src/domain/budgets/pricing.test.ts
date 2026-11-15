@@ -71,6 +71,12 @@ describe("model accessory price mapping", () => {
     expect(result?.unitPrice).toBe(35000);
   });
 
+  it("prices an explicitly selected component without relying on legacy source-column rules", () => {
+    const result = budgetPriceForMaterial(detail, 10105, "Engsel kupu", "pcs", "brown-id", null, null, null, null, null, "kupu-km");
+    expect(result?.componentId).toBe("kupu-km");
+    expect(result?.unitPrice).toBe(35000);
+  });
+
   it("offers both butterfly hinge options and applies the first option by default", () => {
     expect(accessoryPriceOptions(detail, "Engsel kupu").map((item) => item.sourceColumn)).toEqual(["BC", "BI"]);
     const defaultPrice = budgetPriceForMaterial(detail, 10105, "Engsel kupu", "pcs", "brown-id", null, "BC");
