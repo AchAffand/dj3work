@@ -62,7 +62,7 @@ export function relatedMaterialComponents(
   if (!detail) return [];
   if (family === "aluminium") {
     if (/\bkusen\b/i.test(materialName)) {
-      return detail.components.filter((component) => /^KUSEN\s*[34]\b/i.test(component.label));
+      return detail.components.filter((component) => /^KUSEN\b/i.test(component.label));
     }
     const needle = normalize(materialName);
     const candidates = detail.components.filter((component) => normalize(component.category) === "material");
