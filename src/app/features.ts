@@ -50,5 +50,6 @@ export const featureRegistry: readonly FeatureDefinition[] = [
     path: "/pengaturan",
     icon: "⚙",
     component: SettingsPage,
+    adminOnly: true,
   },
 ];
