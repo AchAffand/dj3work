@@ -929,3 +929,13 @@ h1 { margin: 0; color: var(--ink); font-size: clamp(28px, 3vw, 37px); font-weigh
   .project-search-count { align-self: flex-end; }
   .project-list-icon { width: 40px; height: 40px; font-size: 14px; }
 }
+
+/* Material selection belongs to the recap, not the model card. */
+.recap-select-field { display: block; min-width: 92px; max-width: 138px; }
+.recap-select-field select { width: 100%; min-height: 30px; padding: 0 20px 0 7px; border: 1px solid #E8E8E8; border-radius: 6px; background: #FDFDFD; color: #555; font: inherit; font-size: 9px; }
+.recap-select-field select:focus { outline: 0; border-color: #919191; box-shadow: 0 0 0 3px #F3F3F3; }
+.recap-select-field select:disabled { background: #F5F5F5; color: #AAA; cursor: not-allowed; }
+@media (max-width: 720px) {
+  .recap-select-field { min-width: 104px; }
+  .recap-table { min-width: 700px; }
+}
