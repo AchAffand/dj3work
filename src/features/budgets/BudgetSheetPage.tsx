@@ -180,17 +180,19 @@ export function BudgetSheetPage() {
     <section className="page-content budget-page budget-sheet-page">
       <div className="budget-sheet-heading">
         <div>
-          <button className="budget-back-button" type="button" onClick={() => navigate("/master-harga")}>
-            <span aria-hidden="true">←</span> Kembali ke Master Harga
-          </button>
           <p className="eyebrow">MASTER BUDGET KUSEN 2026</p>
           <h1>{detail.catalog.label}</h1>
           <p className="page-description">Lembar harga mengikuti susunan workbook Excel. Klik sel harga untuk mengubah nilainya.</p>
         </div>
-        {isCatalogAdmin && <button className="primary-button" type="button" onClick={() => {
-          setComponentDraft({ label: "", unit: "pcs", groupLabel: sectionOptions[0] ?? "" });
-          setMessage(null);
-        }}>+ Tambah item</button>}
+        <div className="budget-sheet-heading-actions">
+          <button className="budget-back-button" type="button" onClick={() => navigate("/master-harga")}>
+            <span aria-hidden="true">←</span> Kembali
+          </button>
+          {isCatalogAdmin && <button className="primary-button" type="button" onClick={() => {
+            setComponentDraft({ label: "", unit: "pcs", groupLabel: sectionOptions[0] ?? "" });
+            setMessage(null);
+          }}>+ Tambah item</button>}
+        </div>
       </div>
 
       <nav className="budget-sheet-tabs" aria-label="Lembar workbook">
