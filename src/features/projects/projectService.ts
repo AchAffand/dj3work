@@ -5,7 +5,7 @@ import type { ExpressionNode } from "../../domain/formulas/ast";
 import type { Project, ProjectFormulaSnapshot, ProjectInput, ProjectModelLineInput, ProjectPriceInput } from "../../domain/projects/types";
 import { aggregateMaterials, type MaterialRecapRow } from "../recap/aggregateMaterials";
 
-export type MaterialSelection = { catalogId: string | null; variantId: string | null };
+export type MaterialSelection = { catalogId: string | null; variantId: string | null; componentId?: string | null };
 
 export type ProjectLineDraft = {
   id?: string;

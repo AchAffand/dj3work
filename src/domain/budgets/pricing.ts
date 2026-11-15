@@ -132,6 +132,7 @@ export function budgetPriceForMaterial(
   windowSourceColumn?: string | null,
   glassSourceColumn?: string | null,
   tatapanSourceColumn?: string | null,
+  selectedComponentId?: string | null,
 ) {
   if (!detail || !variantId) return null;
   const mapping = detail.mappings.find((item) => item.materialKey === normalizeMaterialKey(name, unit) && item.active);
@@ -150,7 +151,8 @@ export function budgetPriceForMaterial(
   const selectedTatapan = tatapanSourceColumn && ["M", "N"].includes(tatapanSourceColumn)
     ? detail.components.find((item) => item.sourceColumn === tatapanSourceColumn)
     : undefined;
-  const component = selectedDoorLeaf ?? selectedAccessory ?? selectedWindow ?? selectedGlass ?? selectedTatapan ?? (mapping?.componentId ? detail.components.find((item) => item.id === mapping.componentId) : undefined);
+  const selectedComponent = selectedComponentId ? detail.components.find((item) => item.id === selectedComponentId) : undefined;
+  const component = selectedComponent ?? selectedDoorLeaf ?? selectedAccessory ?? selectedWindow ?? selectedGlass ?? selectedTatapan ?? (mapping?.componentId ? detail.components.find((item) => item.id === mapping.componentId) : undefined);
   const variant = detail.variants.find((item) => item.id === variantId);
   if (!component || !variant) return null;
   const price = component.prices[variant.key];
