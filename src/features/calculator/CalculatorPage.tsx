@@ -35,7 +35,7 @@ function materialSelectionMap(project: Project): Record<string, MaterialSelectio
 
 function priceMap(project: Project): Record<string, number | null | undefined> {
   const result: Record<string, number | null | undefined> = {};
-  for (const price of project.prices) result[price.catalogId && price.variantId ? `${price.catalogId}:${price.variantId}:${price.materialCode}` : `manual:${price.materialCode}`] = price.unitPrice;
+  for (const price of project.prices) result[price.catalogId && price.variantId ? `${price.catalogId}:${price.variantId}:${price.materialCode}${price.componentId ? `:${price.componentId}` : ""}` : `manual:${price.materialCode}`] = price.unitPrice;
   return result;
 }
 
