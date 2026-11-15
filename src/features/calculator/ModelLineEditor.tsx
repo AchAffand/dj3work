@@ -2,7 +2,6 @@ import { modelGroupLabel, type DoorModel, type InputVariableName, type InputVari
 import type { ProjectLineDraft } from "../projects/projectService";
 import type { ProjectResultSnapshot } from "../../domain/projects/types";
 import { MaterialResults } from "./MaterialResults";
-import type { BudgetCatalog, BudgetCatalogDetail } from "../../domain/budgets/types";
 
 const inputLabels: Partial<Record<InputVariableName, string>> = {
   T1: "T1 · mm",
@@ -21,11 +20,9 @@ type ModelLineEditorProps = {
   results: ReadonlyMap<string, ProjectResultSnapshot>;
   onChange(lineId: string, updated: ProjectLineDraft): void;
   onRemove(lineId: string): void;
-  budgetCatalogs?: readonly BudgetCatalog[];
-  budgetDetails?: ReadonlyMap<string, BudgetCatalogDetail>;
 };
 
-export function ModelLineEditor({ lines, models, results, onChange, onRemove, budgetCatalogs = [], budgetDetails = new Map() }: ModelLineEditorProps) {
+export function ModelLineEditor({ lines, models, results, onChange, onRemove }: ModelLineEditorProps) {
   return (
     <div className="model-line-list">
       {lines.map((line, index) => {
@@ -68,15 +65,6 @@ export function ModelLineEditor({ lines, models, results, onChange, onRemove, bu
 
             {model && (
               <>
-                {budgetCatalogs.length > 0 && <div className="budget-source-fields">
-                  <label className="dimension-field"><span>Sumber harga</span><select value={line.priceCatalogId ?? ""} onChange={(event) => {
-                    const priceCatalogId = event.target.value || null;
-                    const variants = priceCatalogId ? budgetDetails.get(priceCatalogId)?.variants ?? [] : [];
-                    const defaultVariant = variants.find((variant) => variant.key === "brown") ?? variants[0];
-                    onChange(lineId, { ...line, priceCatalogId, priceVariantId: defaultVariant?.id ?? null });
-                  }}><option value="">Pilih katalog harga</option>{budgetCatalogs.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select></label>
-                  {line.priceCatalogId && <label className="dimension-field"><span>Warna / varian harga</span><select value={line.priceVariantId ?? ""} onChange={(event) => onChange(lineId, { ...line, priceVariantId: event.target.value || null })}><option value="">Pilih varian</option>{(budgetDetails.get(line.priceCatalogId)?.variants ?? []).map((variant) => <option key={variant.id} value={variant.id}>{variant.label}</option>)}</select></label>}
-                </div>}
                 {model.status === "incomplete" && <div className="model-incomplete-tag">Sebagian rumus model ini belum tersedia</div>}
                 {model.inputs.length > 0 && (
                   <div className="input-grid">
