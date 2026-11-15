@@ -154,7 +154,9 @@ export function CalculatorPage() {
     draft.prices,
   ), [budgetDetails, draft.lines, draft.materialSelections, draft.prices, results]);
   const extraMaterials = (draft.extraMaterials ?? []) as ProjectExtraMaterial[];
-  const syncedExtraMaterials = extraMaterials.map((item) => {
+  const syncedExtraMaterials = extraMaterials.filter((item) =>
+    !item.name.startsWith("__door_finish__:") || recap.some((row) => row.materialCode === Number(item.name.split(":")[1])),
+  ).map((item) => {
     if (!item.name.startsWith("__door_finish__:")) return item;
     const materialCode = Number(item.name.split(":")[1]);
     const sourceRow = recap.find((row) => row.materialCode === materialCode);
