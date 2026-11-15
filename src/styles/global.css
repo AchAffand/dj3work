@@ -759,3 +759,23 @@ h1 { margin: 0; color: var(--ink); font-size: clamp(28px, 3vw, 37px); font-weigh
 .budget-workbook-tab-card {
   width: 100%;
 }
+
+/* Back navigation on an opened Master Harga sheet */
+.budget-back-button {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 16px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #666;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 650;
+  transition: color .15s ease, transform .15s ease;
+}
+.budget-back-button span { font-size: 16px; line-height: 1; }
+.budget-back-button:hover { color: #111; transform: translateX(-2px); }
+.budget-back-button:focus-visible { outline: 2px solid #777; outline-offset: 4px; border-radius: 3px; }
