@@ -128,7 +128,7 @@ export function CalculatorPage() {
         };
         const detail = selection.catalogId ? budgetDetails.get(selection.catalogId) : undefined;
         const variant = detail?.variants.find((item) => item.id === selection.variantId);
-        const requiresAluminiumProfile = family === "aluminium" && /\\bkusen\\b/i.test(material.name);
+        const requiresAluminiumProfile = family === "aluminium" && /\bkusen\b/i.test(material.name);
         const mapped = requiresAluminiumProfile && !selection.componentId
           ? null
           : budgetPriceForMaterial(detail, material.materialCode, material.name, material.unit, selection.variantId, null, null, null, null, null, selection.componentId);
