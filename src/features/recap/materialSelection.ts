@@ -30,7 +30,8 @@ export function catalogForFamily(
 
 export type AluminiumVariantChoice = { brand: string; finish: string; variantId: string };
 
-// Master Harga stores brand and finish in one variant label; expose them as separate UI choices.\nexport function aluminiumVariantChoices(detail: BudgetCatalogDetail | undefined): AluminiumVariantChoice[] {
+// Master Harga stores brand and finish in one variant label; expose them as separate UI choices.
+export function aluminiumVariantChoices(detail: BudgetCatalogDetail | undefined): AluminiumVariantChoice[] {
   if (!detail) return [];
   return detail.variants.flatMap((variant) => {
     const separator = variant.label.includes("·") ? "·" : variant.label.includes("|") ? "|" : "";
