@@ -741,3 +741,26 @@ h1 { margin: 0; color: var(--ink); font-size: clamp(28px, 3vw, 37px); font-weigh
   .budget-workbook-tab-card { grid-template-columns: 30px minmax(0,1fr); }
   .budget-workbook-open { grid-column: 2; }
 }
+
+/* Modern Master Harga group controls */
+.budget-group-toolbar { display:flex; align-items:center; justify-content:flex-end; flex-wrap:wrap; gap:9px; }
+.budget-group-button { display:inline-flex; min-height:40px; align-items:center; justify-content:center; gap:8px; padding:0 15px; border:1px solid #DADDE2; border-radius:11px; background:linear-gradient(180deg,#FFFFFF 0%,#F7F8FA 100%); color:#252A32; box-shadow:0 2px 5px rgb(15 23 42 / 4%), inset 0 1px 0 #FFF; cursor:pointer; font-size:10px; font-weight:750; letter-spacing:.045em; transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease,background .16s ease; }
+.budget-group-button:hover:not(:disabled) { transform:translateY(-1px); border-color:#AEB6C2; box-shadow:0 7px 18px rgb(15 23 42 / 9%); }
+.budget-group-button:active:not(:disabled) { transform:translateY(0); }
+.budget-group-button:disabled { opacity:.55; cursor:not-allowed; }
+.budget-group-create { border-color:#1E293B; background:linear-gradient(135deg,#263449 0%,#111827 100%); color:#FFF; box-shadow:0 4px 12px rgb(17 24 39 / 17%); }
+.budget-group-create:hover:not(:disabled) { border-color:#334155; background:linear-gradient(135deg,#334155 0%,#1E293B 100%); }
+.budget-group-create > span { font-size:17px; font-weight:400; line-height:1; }
+.budget-group-delete { border-color:#F1C8C8; background:linear-gradient(180deg,#FFF 0%,#FFF7F7 100%); color:#A52828; }
+.budget-group-delete:hover:not(:disabled),.budget-group-delete.is-active { border-color:#C94A4A; background:#FFF0F0; color:#922222; }
+.budget-group-heading { display:flex; min-height:24px; align-items:center; gap:10px; }
+.budget-group-heading strong { flex:1; }
+.budget-group-heading input { width:15px; height:15px; accent-color:#25364B; cursor:pointer; }
+.budget-group-edit { min-height:25px; padding:0 9px; border:1px solid #D4D9E1; border-radius:7px; background:#FFF; color:#485365; cursor:pointer; font-size:8px; font-weight:750; letter-spacing:.05em; }
+.budget-group-edit:hover { border-color:#8793A4; background:#F4F6F9; }
+.budget-group-modal .budget-input { display:grid; gap:7px; }
+.budget-group-modal .budget-input input { width:100%; height:41px; padding:0 11px; border:1px solid #DDE1E7; border-radius:9px; outline:0; font-size:12px; }
+.budget-group-modal .budget-input input:focus { border-color:#64748B; box-shadow:0 0 0 3px rgb(100 116 139 / 13%); }
+.budget-group-delete-list { display:grid; gap:6px; margin:14px 0 0; padding-left:19px; color:#343B46; font-size:11px; }
+.budget-group-delete-list span { color:#858D99; }
+@media(max-width:760px) { .budget-group-toolbar { width:100%; justify-content:stretch; } .budget-group-toolbar .budget-group-button,.budget-group-toolbar .primary-button { flex:1; min-width:0; } }
