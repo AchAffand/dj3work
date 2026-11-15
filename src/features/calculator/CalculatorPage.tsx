@@ -11,7 +11,7 @@ import { createProjectService, type MaterialSelection, type ProjectDraft, type P
 import { ModelLineEditor } from "./ModelLineEditor";
 import { budgetPriceForMaterial } from "../../domain/budgets/pricing";
 import type { BudgetCatalogDetail } from "../../domain/budgets/types";
-import { catalogForFamily, materialFamily } from "../recap/materialSelection";
+import { catalogForFamily, materialFamily, relatedMaterialComponents } from "../recap/materialSelection";
 
 function makeLine(modelCode: number): ProjectLineDraft {
   return {
@@ -127,20 +127,24 @@ export function CalculatorPage() {
           catalogId: inferredCatalog?.id ?? savedSelection.catalogId,
         };
         const detail = selection.catalogId ? budgetDetails.get(selection.catalogId) : undefined;
-        const variant = detail?.variants.find((item) => item.id === selection.variantId);
-        const requiresAluminiumProfile = family === "aluminium" && /\bkusen\b/i.test(material.name);
-        const mapped = requiresAluminiumProfile && !selection.componentId
+        const componentOptions = relatedMaterialComponents(detail, family, material.name);
+        const componentId = selection.componentId ?? (family !== "other" && componentOptions.length === 1 ? componentOptions[0].id : null);
+        const variantId = selection.variantId ?? (family !== "aluminium" && detail?.variants.length === 1 ? detail.variants[0].id : null);
+        const resolvedSelection = { ...selection, componentId, variantId };
+        const variant = detail?.variants.find((item) => item.id === resolvedSelection.variantId);
+        const requiresComponentChoice = family !== "other" && componentOptions.length > 1 && !resolvedSelection.componentId;
+        const mapped = requiresComponentChoice
           ? null
-          : budgetPriceForMaterial(detail, material.materialCode, material.name, material.unit, selection.variantId, null, null, null, null, null, selection.componentId);
+          : budgetPriceForMaterial(detail, material.materialCode, material.name, material.unit, resolvedSelection.variantId, null, null, null, null, null, resolvedSelection.componentId);
         return {
           ...material,
-          priceKey: mapped?.priceKey ?? (detail && variant && selection.componentId ? `${detail.catalog.id}:${variant.id}:${material.materialCode}:${selection.componentId}` : `manual:${material.materialCode}`),
+          priceKey: mapped?.priceKey ?? (detail && variant && resolvedSelection.componentId ? `${detail.catalog.id}:${variant.id}:${material.materialCode}:${resolvedSelection.componentId}` : `manual:${material.materialCode}`),
           catalogId: selection.catalogId,
           variantId: selection.variantId,
           unitPrice: mapped?.unitPrice ?? null,
           priceVersion: mapped?.priceVersion ?? null,
           expressionSnapshot: mapped?.expressionSnapshot ?? null,
-          componentId: mapped?.componentId ?? null,
+          componentId: mapped?.componentId ?? resolvedSelection.componentId ?? null,
           priceSourceLabel: mapped?.priceSourceLabel ?? (detail && variant ? `${detail.catalog.label} · ${variant.label}` : "Harga manual"),
         };
       }),
