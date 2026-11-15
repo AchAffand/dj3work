@@ -65,6 +65,27 @@ describe("project service", () => {
     expect(resaved.recap.find((row) => row.materialCode === 10101)?.quantity).toBe(5.754);
   });
 
+  it("persists catalog and variant choices made in the material recap", async () => {
+    const repository = memoryRepository();
+    const service = createProjectService(repository, doorCatalog);
+    const saved = await service.saveProject({
+      name: "Material selection",
+      lines: [{ modelCode: 10100, inputs: { T1: 2000, L1: 1754 }, count: 1 }],
+      prices: {},
+      recap: [{
+        materialCode: 10101, name: "kusen", unit: "m'", quantity: 5.754,
+        priceKey: "catalog-1:variant-1:10101:component-1", catalogId: "catalog-1",
+        variantId: "variant-1", unitPrice: 125000, subtotal: 719250,
+        priceVersion: 3, expressionSnapshot: null, componentId: "component-1",
+        priceSourceLabel: "ALMUNIUM · Brown",
+      }],
+    });
+    expect(saved.project.prices[0]).toMatchObject({
+      materialCode: 10101, catalogId: "catalog-1", variantId: "variant-1",
+      componentId: "component-1", unitPrice: 125000,
+    });
+  });
+
   it("snapshots formulas referenced from another model", async () => {
     const repository = memoryRepository();
     const service = createProjectService(repository, doorCatalog);
