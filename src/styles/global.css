@@ -768,28 +768,17 @@ h1 { margin: 0; color: var(--ink); font-size: clamp(28px, 3vw, 37px); font-weigh
   justify-content: flex-end;
   gap: 10px;
 }
-.sheet-return-control {
-  display: inline-flex;
-  min-height: 42px;
-  align-items: center;
-  justify-content: center;
-  gap: 9px;
-  padding: 0 15px;
+/* Reuse the exact primary-button layout, with a white treatment. */
+.primary-button.sheet-return-control {
   border: 1px solid #D7D7D7;
-  border-radius: 8px;
   background: #FFFFFF;
-  color: #444444;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 650;
-  line-height: 1;
-  transition: background .15s ease, border-color .15s ease, color .15s ease;
+  color: #333333;
 }
-.sheet-return-control > span:first-child {
+.primary-button.sheet-return-control > span:first-child {
   font-size: 17px;
   line-height: 1;
 }
-.sheet-return-control:hover {
+.primary-button.sheet-return-control:hover:not(:disabled) {
   border-color: #AFAFAF;
   background: #F5F5F5;
   color: #171717;
