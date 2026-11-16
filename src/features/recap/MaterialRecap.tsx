@@ -234,7 +234,7 @@ export function MaterialRecap({ rows, total, budgetCatalogs, budgetDetails, onSe
                               const nextId = event.target.value || null;
                               const nextDetail = nextId ? budgetDetails.get(nextId) : undefined;
                               const defaultVariant = nextDetail?.variants.find((variant) => variant.key === "brown") ?? nextDetail?.variants[0];
-                              onSelectionChange(row.materialCode, { catalogId: nextId, variantId: defaultVariant?.id ?? null, componentId: null });
+                              onSelectionChange(row.modelIndex, row.materialCode, { catalogId: nextId, variantId: defaultVariant?.id ?? null, componentId: null });
                             }}>
                               <option value="">Pilih katalog</option>
                               {budgetCatalogs.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
