@@ -154,7 +154,7 @@ export function ProjectPrintPage() {
       <article className="project-report">
         <header className="project-offer-header">
           <div className="project-offer-brand">
-            <img src={`${import.meta.env.BASE_URL}logodj3merah.png`} alt="DJ3 Engineering" />
+            <img src={`${import.meta.env.BASE_URL}logodj3merah.png?v=20261116`} alt="DJ3 Engineering" />
           </div>
           <h1 className="project-offer-title"><span>Penawaran</span><span>Harga</span></h1>
         </header>
