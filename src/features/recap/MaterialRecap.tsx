@@ -34,6 +34,13 @@ function createMaterialId(): string {
   });
 }
 
+function displayMaterialName(name: string): string {
+  if (/^kaca\s*\/\s*acp\s*\/\s*sp(?:a)?ndrel\s*\/\s*pintu$/i.test(name.trim())) {
+    return "Kaca/ACP/Spandrel/Pintu";
+  }
+  return name;
+}
+
 const familyLabels = {
   aluminium: "ALUMINIUM",
   glass: "KACA",
@@ -81,7 +88,7 @@ export function MaterialRecap({ rows, total, budgetCatalogs, budgetDetails, onSe
                   <Fragment key={`${row.modelIndex}-${row.materialCode}-${row.unit}-${row.priceKey}`}>
                     {row.modelIndex !== previousRow?.modelIndex && <tr className="recap-model-divider"><td colSpan={5}><div className="recap-model-heading"><span className="recap-model-number">{String(row.modelIndex).padStart(2, "0")}</span><span className="recap-model-label">Model</span><span className="recap-model-name">- {row.modelCode ?? "—"} ({row.modelName ?? "Nama model tidak tersedia"})</span><span className="recap-model-rule" /></div></td></tr>}
                     <tr>
-                    <td><span className="recap-material-name">{row.name}</span><small className="recap-material-code">{row.materialCode} · {row.unit}</small></td>
+                    <td><span className="recap-material-name">{displayMaterialName(row.name)}</span><small className="recap-material-code">{row.materialCode} · {row.unit}</small></td>
                     <td className="recap-quantity">{formatQuantity(row.quantity)} <span>{row.unit}</span></td>
                     <td>
                       {multiSelectable ? (
