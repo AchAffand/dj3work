@@ -6,6 +6,7 @@ import { modelGroupLabel } from "../../domain/catalog/types";
 import type { Project } from "../../domain/projects/types";
 import { useAppServices } from "../../app/AppServices";
 import { useAuth } from "../../auth/AuthProvider";
+import { parseFormulaOptionMaterialKey, supportsMultipleBudgetComponents } from "../recap/materialSelection";
 
 export function ProjectPrintPage() {
   const { projectId = "" } = useParams();
@@ -52,11 +53,17 @@ export function ProjectPrintPage() {
       priceSource: string;
       modelCodes: number[];
     }>();
-    for (const line of project.lines) {
+    for (const [lineIndex, line] of project.lines.entries()) {
+      const modelIndex = lineIndex + 1;
       const model = catalog.get(line.modelCode);
       const groupCode = model?.groupCode ?? 0;
       const type = modelGroupLabel(groupCode, model?.groupName).toUpperCase();
       for (const material of line.resultSnapshot.items) {
+        const hasFormulaOptions = (project.extraMaterials ?? []).some((item) => {
+          const option = parseFormulaOptionMaterialKey(item.name);
+          return option?.modelIndex === modelIndex && option.materialCode === material.materialCode;
+        });
+        if (supportsMultipleBudgetComponents(material.name) && hasFormulaOptions) continue;
         const linePrice = line.priceCatalogId && line.priceVariantId
           ? project.prices.find((price) => price.materialCode === material.materialCode && price.catalogId === line.priceCatalogId && price.variantId === line.priceVariantId)
           : project.prices.find((price) => price.materialCode === material.materialCode && !price.catalogId);
@@ -98,21 +105,27 @@ export function ProjectPrintPage() {
         const component = detail?.components.find((candidate) => candidate.id === item.componentId);
         const variant = detail?.variants.find((candidate) => candidate.id === item.variantId);
         const isDoorFinish = item.name.startsWith("__door_finish__:");
-        const name = isDoorFinish ? `Finishing daun pintu · ${component?.label ?? "Finishing"}` : item.name;
+        const formulaOption = parseFormulaOptionMaterialKey(item.name);
+        const sourceLine = formulaOption ? project.lines[formulaOption.modelIndex - 1] : undefined;
+        const sourceModel = sourceLine ? catalog.get(sourceLine.modelCode) : undefined;
+        const sourceGroupCode = sourceModel?.groupCode ?? Number.MAX_SAFE_INTEGER;
+        const name = isDoorFinish
+          ? `Finishing daun pintu · ${component?.label ?? "Finishing"}`
+          : formulaOption ? component?.label ?? "Item formula" : item.name;
         return {
-          groupCode: Number.MAX_SAFE_INTEGER,
-          type: "MATERIAL TAMBAHAN",
-          materialCode: -index - 1,
+          groupCode: formulaOption ? sourceGroupCode : Number.MAX_SAFE_INTEGER,
+          type: formulaOption && sourceModel ? modelGroupLabel(sourceModel.groupCode, sourceModel.groupName).toUpperCase() : "MATERIAL TAMBAHAN",
+          materialCode: formulaOption ? formulaOption.materialCode : -index - 1,
           name,
           unit: item.unit,
           quantity: item.quantity,
           unitPrice: item.unitPrice,
           priceSource: `${catalogNames.get(item.catalogId ?? "") ?? "Master Harga"}${variant ? ` · ${variant.label}` : ""}`,
-          modelCodes: [] as number[],
+          modelCodes: sourceLine ? [sourceLine.modelCode] : [] as number[],
           subtotal: item.unitPrice === null ? null : Math.round(item.quantity * item.unitPrice * 100) / 100,
         };
       });
-    return [...modelRows, ...extraRows];
+    return [...modelRows, ...extraRows].sort((left, right) => left.groupCode - right.groupCode || left.materialCode - right.materialCode);
   }, [budgetCatalogs, budgetDetails, catalog, project]);
   const total = recap.reduce((sum, row) => sum + (row.subtotal ?? 0), 0);
   const missingPriceCount = recap.filter((row) => row.unitPrice === null).length;
@@ -160,7 +173,7 @@ export function ProjectPrintPage() {
               <colgroup><col /><col /><col /><col /><col /><col /><col /></colgroup>
               <thead><tr><th>TYPE</th><th>ITEM</th><th>QTY</th><th>HARG SAT</th><th>SATUAN</th><th>SUB TOTAL</th><th>GRAND TOTAL</th></tr></thead>
               <tbody>{recap.length ? recap.map((row, index) => (
-                <tr key={`${row.groupCode}-${row.materialCode}-${row.unit}`}>
+                <tr key={`${row.groupCode}-${row.materialCode}-${row.unit}-${row.name}-${index}`}>
                   <td>{index === 0 || recap[index - 1].groupCode !== row.groupCode ? <>{row.type}<small>{row.modelCodes.join(", ")}</small></> : ""}</td>
                   <td>{row.name}<small>{row.materialCode} · {row.priceSource}</small></td>
                   <td>{formatQuantity(row.quantity)}</td>
