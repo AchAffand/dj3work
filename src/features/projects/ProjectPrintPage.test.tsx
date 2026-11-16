@@ -15,6 +15,7 @@ vi.mock("../../auth/AuthProvider", () => ({
 
 const project: Project = {
   id: "project-1",
+  offerNumber: 1001,
   name: "Rumah Contoh",
   location: "Bandung",
   floor: "2",
@@ -66,8 +67,11 @@ describe("ProjectPrintPage", () => {
     expect(await screen.findByText("Rumah Contoh")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /Penawaran Harga/ })).toBeInTheDocument();
     expect(screen.getByAltText("DJ3 Engineering")).toHaveAttribute("src", "/dj3work/logodj3merah.png?v=20261116");
-    expect(screen.getByText("Bandung")).toBeInTheDocument();
-    expect(screen.getByText("2", { selector: "dd" })).toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: "Lokasi" })).toHaveValue("Bandung");
+    expect(screen.getByRole("textbox", { name: "Customer" })).toHaveValue("Rumah Contoh");
+    expect(screen.getByRole("textbox", { name: "Lantai" })).toHaveValue("2");
+    expect(screen.getByDisplayValue("2026-10-01")).toBeInTheDocument();
+    expect(screen.getByText("1001/DJ3/X/2026")).toBeInTheDocument();
     expect(screen.getByText("PINTU", { exact: false })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "HARGA SAT" })).toBeInTheDocument();
     expect(screen.getByText("HANDLE + KUNCI")).toBeInTheDocument();
