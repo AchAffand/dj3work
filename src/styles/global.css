@@ -971,18 +971,31 @@ h1 { margin: 0; color: var(--ink); font-size: clamp(28px, 3vw, 37px); font-weigh
   line-height: 1.4;
   letter-spacing: 0;
 }
-.recap-model-number,
+.recap-model-number {
+  display: inline-flex;
+  width: 32px;
+  height: 30px;
+  flex: 0 0 32px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  background: #202020;
+  color: #FFF;
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
 .recap-model-label,
 .recap-model-name {
   display: inline;
   flex: 0 0 auto;
-  color: inherit;
-  font-size: inherit;
-  font-weight: inherit;
-  letter-spacing: inherit;
+  color: #454B54;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0;
   white-space: nowrap;
 }
-.recap-model-number { color: #20252B; font-variant-numeric: tabular-nums; }
 .recap-model-label { color: #454B54; }
 .recap-model-name {
   min-width: 0;
