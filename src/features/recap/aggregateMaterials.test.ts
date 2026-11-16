@@ -8,14 +8,11 @@ describe("material recap", () => {
       { materials: [frame], modelCount: 2 },
       { materials: [frame], modelCount: 1 },
     ], { "manual:10101": 50000 });
-    expect(rows).toMatchObject([{
-      materialCode: 10101,
-      name: "kusen",
-      unit: "m'",
-      quantity: 17.262,
-      unitPrice: 50000,
-      subtotal: 863100,
-    }]);
+    expect(rows).toHaveLength(2);
+    expect(rows).toMatchObject([
+      { modelIndex: 1, materialCode: 10101, name: "kusen", unit: "m'", quantity: 11.508, unitPrice: 50000, subtotal: 575400 },
+      { modelIndex: 2, materialCode: 10101, name: "kusen", unit: "m'", quantity: 5.754, unitPrice: 50000, subtotal: 287700 },
+    ]);
   });
 
   it("keeps same-name materials with different units separate", () => {
@@ -53,4 +50,15 @@ describe("material recap", () => {
     ], {});
     expect(rows[0]).toMatchObject({ unitPrice: null, subtotal: null });
   });
+  it("keeps identical materials in separate model groups", () => {
+    const frame = { materialCode: 10101, name: "kusen", unit: "m'", quantity: 5 };
+    const rows = aggregateMaterials([
+      { modelIndex: 1, materials: [frame], modelCount: 2 },
+      { modelIndex: 2, materials: [frame], modelCount: 1 },
+    ], { "manual:10101": 50000 });
+    expect(rows).toHaveLength(2);
+    expect(rows.map((row) => row.modelIndex)).toEqual([1, 2]);
+    expect(rows.map((row) => row.quantity)).toEqual([10, 5]);
+  });
+
 });
