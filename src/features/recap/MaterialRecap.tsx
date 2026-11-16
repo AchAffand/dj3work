@@ -166,44 +166,13 @@ export function MaterialRecap({ rows, total, budgetCatalogs, budgetDetails, onSe
                       ) : family === "aluminium" && detail ? (
                         <div className="recap-selection-stack">
                           <span className="recap-family-tag">ALUMINIUM</span>
-                          {multiSelectable ? (
-                            <div className="recap-formula-option-editor">
-                              <label className="recap-select-field">
-                                <span className="sr-only">Pilih katalog untuk {row.name}</span>
-                                <select value={catalogId} onChange={(event) => changeFormulaCatalog(event.target.value)}>
-                                  <option value="">Pilih katalog</option>
-                                  {budgetCatalogs.map((catalog) => <option key={catalog.id} value={catalog.id}>{catalog.label}</option>)}
-                                </select>
-                              </label>
-                              {detail && (
-                                <label className="recap-select-field">
-                                  <span className="sr-only">Pilih item katalog untuk {row.name}</span>
-                                  <select value="" onChange={(event) => addFormulaOption(event.target.value)} disabled={!detail.components.length}>
-                                    <option value="">Pilih item katalog</option>
-                                    {detail.components.filter((component) => !selectedFormulaOptionIds.has(component.id)).map((component) => <option key={component.id} value={component.id}>{componentLabel(component)}</option>)}
-                                  </select>
-                                </label>
-                              )}
-                              {selectedFormulaOptions.map((item) => {
-                                const itemDetail = item.catalogId ? budgetDetails.get(item.catalogId) : undefined;
-                                const component = itemDetail?.components.find((candidate) => candidate.id === item.componentId);
-                                return (
-                                  <div className="recap-formula-selected-item" key={item.id}>
-                                    <span>{component ? componentLabel(component) : "Item terpilih"}</span>
-                                    {itemDetail && itemDetail.variants.length > 1 ? (
-                                      <select aria-label={`Varian harga ${component?.label ?? "item"}`} value={item.variantId ?? ""} onChange={(event) => updateFormulaOption(item.id, { variantId: event.target.value || null, unitPrice: null })}>
-                                        <option value="">Pilih varian harga</option>
-                                        {itemDetail.variants.map((variant) => <option key={variant.id} value={variant.id}>{variant.label}</option>)}
-                                      </select>
-                                    ) : (
-                                      <small>{itemDetail?.variants[0]?.label ?? "Varian tidak tersedia"}</small>
-                                    )}
-                                    <button type="button" className="recap-formula-remove" aria-label={`Hapus ${component?.label ?? "item"}`} onClick={() => removeFormulaOption(item.id)}>×</button>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          ) : (
+                          <label className="recap-select-field">
+                            <span className="sr-only">{/\bkusen\b/i.test(row.name) ? "Ukuran profil kusen" : "Komponen aluminium"} {row.name}</span>
+                            <select value={row.componentId ?? ""} onChange={(event) => selection({ componentId: event.target.value || null })}>
+                              <option value="">{/\bkusen\b/i.test(row.name) ? "Pilih profil kusen" : "Pilih komponen aluminium"}</option>
+                              {components.map((component) => <option key={component.id} value={component.id}>{componentLabel(component)}</option>)}
+                            </select>
+                          </label>                          ) : (
                             <label className="recap-select-field">
                               <span className="sr-only">{/\bkusen\b/i.test(row.name) ? "Ukuran profil kusen" : "Komponen aluminium"} {row.name}</span>
                               <select value={row.componentId ?? ""} onChange={(event) => selection({ componentId: event.target.value || null })}>
@@ -239,44 +208,13 @@ export function MaterialRecap({ rows, total, budgetCatalogs, budgetDetails, onSe
                       ) : family !== "other" && detail ? (
                         <div className="recap-selection-stack">
                           <span className="recap-family-tag">{familyLabels[family]}</span>
-                          {multiSelectable ? (
-                            <div className="recap-formula-option-editor">
-                              <label className="recap-select-field">
-                                <span className="sr-only">Pilih katalog untuk {row.name}</span>
-                                <select value={catalogId} onChange={(event) => changeFormulaCatalog(event.target.value)}>
-                                  <option value="">Pilih katalog</option>
-                                  {budgetCatalogs.map((catalog) => <option key={catalog.id} value={catalog.id}>{catalog.label}</option>)}
-                                </select>
-                              </label>
-                              {detail && (
-                                <label className="recap-select-field">
-                                  <span className="sr-only">Pilih item katalog untuk {row.name}</span>
-                                  <select value="" onChange={(event) => addFormulaOption(event.target.value)} disabled={!detail.components.length}>
-                                    <option value="">Pilih item katalog</option>
-                                    {detail.components.filter((component) => !selectedFormulaOptionIds.has(component.id)).map((component) => <option key={component.id} value={component.id}>{componentLabel(component)}</option>)}
-                                  </select>
-                                </label>
-                              )}
-                              {selectedFormulaOptions.map((item) => {
-                                const itemDetail = item.catalogId ? budgetDetails.get(item.catalogId) : undefined;
-                                const component = itemDetail?.components.find((candidate) => candidate.id === item.componentId);
-                                return (
-                                  <div className="recap-formula-selected-item" key={item.id}>
-                                    <span>{component ? componentLabel(component) : "Item terpilih"}</span>
-                                    {itemDetail && itemDetail.variants.length > 1 ? (
-                                      <select aria-label={`Varian harga ${component?.label ?? "item"}`} value={item.variantId ?? ""} onChange={(event) => updateFormulaOption(item.id, { variantId: event.target.value || null, unitPrice: null })}>
-                                        <option value="">Pilih varian harga</option>
-                                        {itemDetail.variants.map((variant) => <option key={variant.id} value={variant.id}>{variant.label}</option>)}
-                                      </select>
-                                    ) : (
-                                      <small>{itemDetail?.variants[0]?.label ?? "Varian tidak tersedia"}</small>
-                                    )}
-                                    <button type="button" className="recap-formula-remove" aria-label={`Hapus ${component?.label ?? "item"}`} onClick={() => removeFormulaOption(item.id)}>×</button>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          ) : (
+                          <label className="recap-select-field">
+                            <span className="sr-only">Pilih jenis {row.name}</span>
+                            <select value={row.componentId ?? ""} onChange={(event) => selection({ componentId: event.target.value || null })}>
+                              <option value="">Pilih jenis material</option>
+                              {components.map((component) => <option key={component.id} value={component.id}>{componentLabel(component)}</option>)}
+                            </select>
+                          </label>                          ) : (
                             <label className="recap-select-field">
                               <span className="sr-only">Pilih jenis {row.name}</span>
                               <select value={row.componentId ?? ""} onChange={(event) => selection({ componentId: event.target.value || null })}>
