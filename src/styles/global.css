@@ -950,10 +950,10 @@ h1 { margin: 0; color: var(--ink); font-size: clamp(28px, 3vw, 37px); font-weigh
 }
 
 
-/* Elegant, full-width model separators in the live material recap. */
+/* Compact, consistent model heading: [01] Model - 10100 (Pintu). */
 .recap-table .recap-model-divider > td,
 .recap-table .recap-model-divider > td:last-child {
-  padding: 17px 0 7px !important;
+  padding: 14px 0 8px !important;
   border: 0 !important;
   background: transparent !important;
   text-align: left !important;
@@ -962,45 +962,32 @@ h1 { margin: 0; color: var(--ink); font-size: clamp(28px, 3vw, 37px); font-weigh
   display: flex;
   min-width: 0;
   align-items: center;
-  gap: 9px;
-  padding-top: 11px;
-  border-top: 1px solid #E7E7E7;
+  gap: 7px;
+  padding: 10px 0 9px;
+  border-top: 1px solid #E5E7EB;
+  color: #454B54;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0;
 }
-.recap-model-number {
-  display: inline-flex;
-  width: 25px;
-  height: 25px;
-  flex: 0 0 25px;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6px;
-  background: #202020;
-  color: #FFF;
-  font-size: 9px;
-  font-weight: 750;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: .02em;
-}
-.recap-model-label {
-  color: #4A4A4A;
-  font-size: 9px;
-  font-weight: 750;
-  letter-spacing: .13em;
-  white-space: nowrap;
-}
-.recap-model-rule {
-  height: 1px;
-  flex: 1 1 auto;
-  margin-left: 3px;
-  background: linear-gradient(90deg, #E6E6E6 0%, #F7F7F7 100%);
-}
-
+.recap-model-number,
+.recap-model-label,
 .recap-model-name {
-  color: #777;
-  font-size: 10px;
-  font-weight: 550;
-  letter-spacing: .01em;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  display: inline;
+  flex: 0 0 auto;
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
   white-space: nowrap;
 }
+.recap-model-number { color: #20252B; font-variant-numeric: tabular-nums; }
+.recap-model-label { color: #454B54; }
+.recap-model-name {
+  min-width: 0;
+  overflow: hidden;
+  color: #454B54;
+  text-overflow: ellipsis;
+}
+.recap-model-rule { display: none; }

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import type { Project, ProjectExtraMaterial } from "../../domain/projects/types";
 import { calculateModel } from "../../domain/formulas/calculateModel";
+import { modelGroupLabel } from "../../domain/catalog/types";
 import { AppPageState } from "../../app/AppPageState";
 import { formatRupiah } from "../../app/format";
 import { useAppServices } from "../../app/AppServices";
@@ -120,7 +121,7 @@ export function CalculatorPage() {
   const recap = useMemo(() => aggregateMaterials(
     draft.lines.map((line, index) => ({
       modelIndex: index + 1,
-      modelName: catalog.get(line.modelCode)?.name ?? `Model ${line.modelCode}`,
+      modelName: catalog.get(line.modelCode) ? modelGroupLabel(catalog.get(line.modelCode)!.groupCode, catalog.get(line.modelCode)!.groupName) : "Model Kusen",
       modelCode: line.modelCode,
       materials: (results.get(line.id ?? `${line.modelCode}`)?.items ?? []).map((material) => {
         const family = materialFamily(material.name, material.unit);
