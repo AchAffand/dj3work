@@ -169,12 +169,11 @@ export function ProjectPrintPage() {
           <h1 className="project-offer-title"><span>Penawaran</span><span>Harga</span></h1>
         </header>
 
-        <div className="project-offer-number"><strong>No :</strong> {project.offerNumber ?? 1001}/DJ3/{["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"][new Date((project.createdAt ?? new Date().toISOString()).slice(0, 10) + "T12:00:00").getMonth()]}/{new Date(project.createdAt ?? new Date().toISOString()).getFullYear()}</div>
-
         <dl className="project-offer-meta">
           <div><dt>CUSTOMER</dt><dd><input aria-label="Customer" value={customer} onChange={(event) => setCustomer(event.target.value)} /></dd></div>
           <div><dt>LOKASI</dt><dd><input aria-label="Lokasi" value={location} onChange={(event) => setLocation(event.target.value)} /></dd></div>
           <div><dt>LANTAI</dt><dd><input aria-label="Lantai" value={floor} onChange={(event) => setFloor(event.target.value)} /></dd></div>
+          <div><dt>NO. PENAWARAN</dt><dd>{project.offerNumber ?? 1001}/DJ3/{["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"][new Date((project.createdAt ?? new Date().toISOString()).slice(0, 10) + "T12:00:00").getMonth()]}/{new Date(project.createdAt ?? new Date().toISOString()).getFullYear()}</dd></div>
           <div><dt>TANGGAL</dt><dd><input aria-label="Tanggal penawaran" type="date" value={reportDate} onChange={(event) => setReportDate(event.target.value)} /></dd></div>
         </dl>
 
