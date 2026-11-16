@@ -12,7 +12,7 @@ import { createProjectService, type MaterialSelection, type ProjectDraft, type P
 import { ModelLineEditor } from "./ModelLineEditor";
 import { budgetPriceForMaterial } from "../../domain/budgets/pricing";
 import type { BudgetCatalogDetail } from "../../domain/budgets/types";
-import { catalogForFamily, materialFamily, relatedMaterialComponents } from "../recap/materialSelection";
+import { catalogForFamily, formulaOptionMaterialKey, materialFamily, parseFormulaOptionMaterialKey, relatedMaterialComponents, supportsMultipleBudgetComponents } from "../recap/materialSelection";
 
 function makeLine(modelCode: number): ProjectLineDraft {
   return {
@@ -32,6 +32,12 @@ function materialSelectionMap(project: Project): Record<string, MaterialSelectio
     for (const material of line.resultSnapshot.items) result[String(material.materialCode)] ??= { catalogId: line.priceCatalogId, variantId: line.priceVariantId };
   }
   for (const price of project.prices) if (price.catalogId || price.variantId) result[String(price.materialCode)] = { catalogId: price.catalogId ?? null, variantId: price.variantId ?? null, componentId: price.componentId ?? null };
+  for (const item of project.extraMaterials ?? []) {
+    const option = parseFormulaOptionMaterialKey(item.name);
+    if (option) result[`${option.modelIndex}:${option.materialCode}`] = {
+      catalogId: item.catalogId, variantId: item.variantId, componentId: null,
+    };
+  }
   return result;
 }
 
@@ -126,31 +132,43 @@ export function CalculatorPage() {
       materials: (results.get(line.id ?? `${line.modelCode}`)?.items ?? []).map((material) => {
         const family = materialFamily(material.name, material.unit);
         const inferredCatalog = catalogForFamily(family, budgetCatalogs);
-        const savedSelection = draft.materialSelections?.[String(material.materialCode)] ?? { catalogId: line.priceCatalogId ?? null, variantId: line.priceVariantId ?? null, componentId: null };
+        const modelIndex = index + 1;
+        const multiSelectable = supportsMultipleBudgetComponents(material.name);
+        const savedSelection = draft.materialSelections?.[`${modelIndex}:${material.materialCode}`]
+          ?? draft.materialSelections?.[String(material.materialCode)]
+          ?? { catalogId: line.priceCatalogId ?? null, variantId: line.priceVariantId ?? null, componentId: null };
+        const savedFormulaOption = (draft.extraMaterials ?? []).find((item) => {
+          const option = parseFormulaOptionMaterialKey(item.name);
+          return option?.modelIndex === modelIndex && option.materialCode === material.materialCode;
+        });
         const selection = {
           ...savedSelection,
           catalogId: inferredCatalog?.id ?? savedSelection.catalogId,
         };
         const detail = selection.catalogId ? budgetDetails.get(selection.catalogId) : undefined;
         const componentOptions = relatedMaterialComponents(detail, family, material.name);
-        const componentId = selection.componentId ?? (family !== "other" && componentOptions.length === 1 ? componentOptions[0].id : null);
+        const componentId = multiSelectable ? null : selection.componentId ?? (family !== "other" && componentOptions.length === 1 ? componentOptions[0].id : null);
         const variantId = selection.variantId ?? (family !== "aluminium" && detail?.variants.length === 1 ? detail.variants[0].id : null);
-        const resolvedSelection = { ...selection, componentId, variantId };
+        const resolvedSelection = {
+          ...selection,
+          componentId,
+          variantId: savedFormulaOption?.variantId ?? variantId,
+        };
         const variant = detail?.variants.find((item) => item.id === resolvedSelection.variantId);
-        const requiresComponentChoice = family !== "other" && componentOptions.length > 1 && !resolvedSelection.componentId;
-        const mapped = requiresComponentChoice
+        const requiresComponentChoice = !multiSelectable && family !== "other" && componentOptions.length > 1 && !resolvedSelection.componentId;
+        const mapped = multiSelectable || requiresComponentChoice
           ? null
           : budgetPriceForMaterial(detail, material.materialCode, material.name, material.unit, resolvedSelection.variantId, null, null, null, null, null, resolvedSelection.componentId);
         return {
           ...material,
-          priceKey: mapped?.priceKey ?? (detail && variant && resolvedSelection.componentId ? `${detail.catalog.id}:${variant.id}:${material.materialCode}:${resolvedSelection.componentId}` : `manual:${material.materialCode}`),
+          priceKey: multiSelectable ? `formula-options-base:${modelIndex}:${material.materialCode}` : mapped?.priceKey ?? (detail && variant && resolvedSelection.componentId ? `${detail.catalog.id}:${variant.id}:${material.materialCode}:${resolvedSelection.componentId}` : `manual:${material.materialCode}`),
           catalogId: selection.catalogId,
           variantId: resolvedSelection.variantId,
-          unitPrice: mapped?.unitPrice ?? null,
+          unitPrice: multiSelectable ? null : mapped?.unitPrice ?? null,
           priceVersion: mapped?.priceVersion ?? null,
           expressionSnapshot: mapped?.expressionSnapshot ?? null,
-          componentId: mapped?.componentId ?? resolvedSelection.componentId ?? null,
-          priceSourceLabel: mapped?.priceSourceLabel ?? (detail && variant ? `${detail.catalog.label} · ${variant.label}` : "Harga manual"),
+          componentId: multiSelectable ? null : mapped?.componentId ?? resolvedSelection.componentId ?? null,
+          priceSourceLabel: multiSelectable ? "Pilihan item Master Harga" : mapped?.priceSourceLabel ?? (detail && variant ? `${detail.catalog.label} · ${variant.label}` : "Harga manual"),
         };
       }),
       modelCount: line.count,
@@ -158,9 +176,16 @@ export function CalculatorPage() {
     draft.prices,
   ), [budgetDetails, draft.lines, draft.materialSelections, draft.prices, results]);
   const extraMaterials = (draft.extraMaterials ?? []) as ProjectExtraMaterial[];
-  const syncedExtraMaterials = extraMaterials.filter((item) =>
-    !item.name.startsWith("__door_finish__:") || recap.some((row) => row.materialCode === Number(item.name.split(":")[1])),
-  ).map((item) => {
+  const syncedExtraMaterials = extraMaterials.filter((item) => {
+    if (item.name.startsWith("__door_finish__:")) return recap.some((row) => row.materialCode === Number(item.name.split(":")[1]));
+    const option = parseFormulaOptionMaterialKey(item.name);
+    return !option || recap.some((row) => row.modelIndex === option.modelIndex && row.materialCode === option.materialCode);
+  }).map((item) => {
+    const formulaOption = parseFormulaOptionMaterialKey(item.name);
+    if (formulaOption) {
+      const sourceRow = recap.find((row) => row.modelIndex === formulaOption.modelIndex && row.materialCode === formulaOption.materialCode);
+      return sourceRow ? { ...item, quantity: sourceRow.quantity, variantId: sourceRow.variantId } : item;
+    }
     if (!item.name.startsWith("__door_finish__:")) return item;
     const materialCode = Number(item.name.split(":")[1]);
     const sourceRow = recap.find((row) => row.materialCode === materialCode);
@@ -275,9 +300,9 @@ export function CalculatorPage() {
             onExtraMaterialsChange={(items) => setDraft((current) => ({ ...current, extraMaterials: items }))}
             budgetCatalogs={budgetCatalogs}
             budgetDetails={budgetDetails}
-            onSelectionChange={(materialCode, selection) => setDraft((current) => ({
+            onSelectionChange={(modelIndex, materialCode, selection) => setDraft((current) => ({
               ...current,
-              materialSelections: { ...current.materialSelections, [String(materialCode)]: selection },
+              materialSelections: { ...current.materialSelections, [`${modelIndex}:${materialCode}`]: selection },
             }))}
             onPriceChange={(priceKey, unitPrice) => setDraft((current) => ({
               ...current,
