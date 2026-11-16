@@ -118,7 +118,9 @@ export function CalculatorPage() {
   }, [catalog, draft.lines]);
 
   const recap = useMemo(() => aggregateMaterials(
-    draft.lines.map((line) => ({
+    draft.lines.map((line, index) => ({
+      modelIndex: index + 1,
+      modelName: catalog.get(line.modelCode)?.name ?? `Model ${line.modelCode}`,
       materials: (results.get(line.id ?? `${line.modelCode}`)?.items ?? []).map((material) => {
         const family = materialFamily(material.name, material.unit);
         const inferredCatalog = catalogForFamily(family, budgetCatalogs);
