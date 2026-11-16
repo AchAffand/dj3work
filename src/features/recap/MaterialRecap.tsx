@@ -137,9 +137,9 @@ export function MaterialRecap({ rows, total, budgetCatalogs, budgetDetails, onSe
                             {detail && (
                               <label className="recap-select-field">
                                 <span className="sr-only">Pilih item katalog untuk {row.name}</span>
-                                <select value="" onChange={(event) => addFormulaOption(event.target.value)} disabled={!detail.components.length}>
+                                <select value="" onChange={(event) => addFormulaOption(event.target.value)} disabled={!components.length}>
                                   <option value="">Pilih item katalog</option>
-                                  {detail.components.filter((component) => !selectedFormulaOptionIds.has(component.id)).map((component) => <option key={component.id} value={component.id}>{componentLabel(component)}</option>)}
+                                  {components.filter((component) => !selectedFormulaOptionIds.has(component.id)).map((component) => <option key={component.id} value={component.id}>{componentLabel(component)}</option>)}
                                 </select>
                               </label>
                             )}
@@ -271,7 +271,7 @@ export function MaterialRecap({ rows, total, budgetCatalogs, budgetDetails, onSe
                               {budgetCatalogs.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
                             </select>
                           </label>
-                          {detail && detail.components.length > 0 && (
+                          {detail && components.length > 0 && (
                             <label className="recap-select-field">
                               <span className="sr-only">Pilih item katalog untuk {row.name}</span>
                               <select value={row.componentId ?? ""} onChange={(event) => selection({
