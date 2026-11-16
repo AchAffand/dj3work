@@ -26,7 +26,7 @@ function extraMaterialBelongsToLine(item: ProjectExtraMaterial, lineId: string |
 export function ProjectPrintPage() {
   const { projectId = "" } = useParams();
   const navigate = useNavigate();
-  const { repository, catalog } = useAppServices();
+  const { repository, catalog, budgetDetails } = useAppServices();
   const { user } = useAuth();
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
@@ -80,10 +80,11 @@ export function ProjectPrintPage() {
       });
       for (const item of (project.extraMaterials ?? []).filter((extra) => extraMaterialBelongsToLine(extra, line.id, lineIndex))) {
         const option = parseFormulaOptionMaterialKey(item.name);
-        const detail = item.catalogId ? undefined : undefined;
+        const detail = item.catalogId ? budgetDetails?.get(item.catalogId) : undefined;
+        const component = detail?.components.find((candidate) => candidate.id === item.componentId);
         const name = item.name.startsWith("__door_finish__:")
-          ? item.name.replace("__door_finish__:", "Finishing daun pintu · ")
-          : option ? item.name : item.name;
+          ? `Finishing daun pintu · ${component?.label ?? "Finishing"}`
+          : option ? component?.label ?? "Item formula" : item.name;
         const quantity = item.quantity * line.count;
         rows.push({
           name,
@@ -106,15 +107,17 @@ export function ProjectPrintPage() {
         missingPriceCount,
       };
     });
-  }, [catalog, project]);
+  }, [budgetDetails, catalog, project]);
 
   const globalExtras = useMemo(() => {
     if (!project) return [] as PrintRow[];
     return (project.extraMaterials ?? [])
       .filter((item) => !item.modelLineId && !parseFormulaOptionMaterialKey(item.name))
       .map((item) => {
+        const detail = item.catalogId ? budgetDetails?.get(item.catalogId) : undefined;
+        const component = detail?.components.find((candidate) => candidate.id === item.componentId);
         const name = item.name.startsWith("__door_finish__:")
-          ? item.name.replace("__door_finish__:", "Finishing daun pintu · ")
+          ? `Finishing daun pintu · ${component?.label ?? "Finishing"}`
           : item.name;
         return {
           name,
@@ -124,7 +127,7 @@ export function ProjectPrintPage() {
           subtotal: item.unitPrice == null ? null : Math.round(item.quantity * item.unitPrice * 100) / 100,
         };
       });
-  }, [project]);
+  }, [budgetDetails, project]);
 
   const grandTotal = [...modelSections, { subtotal: globalExtras.reduce((sum, row) => sum + (row.subtotal ?? 0), 0) }]
     .reduce((sum, section) => sum + section.subtotal, 0);
