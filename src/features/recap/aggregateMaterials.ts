@@ -15,12 +15,14 @@ export type RecapInputMaterial = {
 
 export type RecapLineInput = {
   modelIndex?: number;
+  modelName?: string;
   materials: readonly RecapInputMaterial[];
   modelCount: number;
 };
 
 export type MaterialRecapRow = {
   modelIndex: number;
+  modelName?: string;
   materialCode: number;
   name: string;
   unit: string;
@@ -52,6 +54,7 @@ export function aggregateMaterials(
       if (row) row.quantity += quantity;
       else totals.set(identity, {
         modelIndex,
+        modelName: line.modelName,
         materialCode: material.materialCode,
         name: material.name,
         unit: material.unit,
@@ -82,6 +85,7 @@ export function aggregateMaterials(
         : null;
       return {
         modelIndex: row.modelIndex,
+        modelName: row.modelName,
         materialCode: row.materialCode, name: row.name, unit: row.unit, quantity: row.quantity, priceKey: row.priceKey,
         catalogId: row.catalogId, variantId: row.variantId, priceVersion: row.priceVersion,
         expressionSnapshot: row.expressionSnapshot, componentId: row.componentId, priceSourceLabel: row.priceSourceLabel,
