@@ -31,6 +31,10 @@ export function ProjectPrintPage() {
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [customer, setCustomer] = useState("");
+  const [location, setLocation] = useState("");
+  const [floor, setFloor] = useState("");
+  const [reportDate, setReportDate] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -44,7 +48,12 @@ export function ProjectPrintPage() {
     void repository.loadProject(projectId).then((loaded) => {
       if (active) {
         setProject(loaded);
-        if (!loaded) setError("Proyek tidak ditemukan atau tidak dapat dibuka.");
+        if (loaded) {
+          setCustomer(loaded.name);
+          setLocation(loaded.location ?? "");
+          setFloor(loaded.floor ?? "");
+          setReportDate((loaded.createdAt ?? new Date().toISOString()).slice(0, 10));
+        } else setError("Proyek tidak ditemukan atau tidak dapat dibuka.");
       }
     }).catch((cause) => {
       if (active) setError(cause instanceof Error ? cause.message : "Penawaran proyek tidak dapat dibuka.");
@@ -65,9 +74,11 @@ export function ProjectPrintPage() {
       const rows: PrintRow[] = line.resultSnapshot.items.flatMap((material) => {
         const hasOptions = optionMaterials.some((item) => parseFormulaOptionMaterialKey(item.name)?.materialCode === material.materialCode);
         if (supportsMultipleBudgetComponents(material.name) && hasOptions) return [];
-        const price = line.priceCatalogId && line.priceVariantId
-          ? project.prices.find((item) => item.materialCode === material.materialCode && item.catalogId === line.priceCatalogId && item.variantId === line.priceVariantId)
-          : project.prices.find((item) => item.materialCode === material.materialCode && !item.catalogId);
+        const candidates = project.prices.filter((item) => item.materialCode === material.materialCode);
+        const exactPrice = line.priceCatalogId && line.priceVariantId
+          ? candidates.find((item) => item.catalogId === line.priceCatalogId && item.variantId === line.priceVariantId)
+          : undefined;
+        const price = exactPrice ?? candidates.find((item) => item.unitPrice !== null) ?? candidates[0];
         const quantity = material.quantity * line.count;
         return [{
           name: material.name,
@@ -136,7 +147,6 @@ export function ProjectPrintPage() {
   const authorName = typeof user?.user_metadata.full_name === "string" && user.user_metadata.full_name.trim()
     ? user.user_metadata.full_name.trim()
     : user?.email ?? "DJ3 Engineering";
-  const reportDate = formatDate(new Date().toISOString());
 
   if (loading) return <AppPageState title="Menyiapkan penawaran" detail="Data proyek sedang dimuat." />;
   if (error || !project) {
@@ -159,11 +169,13 @@ export function ProjectPrintPage() {
           <h1 className="project-offer-title"><span>Penawaran</span><span>Harga</span></h1>
         </header>
 
+        <div className="project-offer-number"><strong>No :</strong> {project.offerNumber ?? 1001}/DJ3/{["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"][new Date((project.createdAt ?? new Date().toISOString()).slice(0, 10) + "T12:00:00").getMonth()]}/{new Date(project.createdAt ?? new Date().toISOString()).getFullYear()}</div>
+
         <dl className="project-offer-meta">
-          <div><dt>CUSTOMER</dt><dd>{project.name}</dd></div>
-          <div><dt>LOKASI</dt><dd>{project.location?.trim() || "—"}</dd></div>
-          <div><dt>LANTAI</dt><dd>{project.floor?.trim() || "—"}</dd></div>
-          <div><dt>TANGGAL</dt><dd>{reportDate}</dd></div>
+          <div><dt>CUSTOMER</dt><dd><input aria-label="Customer" value={customer} onChange={(event) => setCustomer(event.target.value)} /></dd></div>
+          <div><dt>LOKASI</dt><dd><input aria-label="Lokasi" value={location} onChange={(event) => setLocation(event.target.value)} /></dd></div>
+          <div><dt>LANTAI</dt><dd><input aria-label="Lantai" value={floor} onChange={(event) => setFloor(event.target.value)} /></dd></div>
+          <div><dt>TANGGAL</dt><dd><input aria-label="Tanggal penawaran" type="date" value={reportDate} onChange={(event) => setReportDate(event.target.value)} /></dd></div>
         </dl>
 
         <div className="project-offer-sections">
