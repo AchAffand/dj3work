@@ -125,7 +125,7 @@ export function MaterialRecap({ rows, total, budgetCatalogs, budgetDetails, onSe
                     <td>
                       {multiSelectable ? (
                         <div className="recap-selection-stack">
-                          <span className="recap-family-tag">{familyLabels[family]}</span>
+                          <span className="recap-family-tag">{family === "aluminium" ? "ALUMINIUM" : "KACA"}</span>
                           <div className="recap-formula-option-editor">
                             <label className="recap-select-field">
                               <span className="sr-only">Pilih katalog untuk {row.name}</span>
