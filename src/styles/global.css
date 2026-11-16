@@ -1048,3 +1048,85 @@ h1 { margin: 0; color: var(--ink); font-size: clamp(28px, 3vw, 37px); font-weigh
   font-size: 11px;
   line-height: 1.4;
 }
+
+
+/* Formula material selector: catalog -> component -> per-item price variant. */
+.recap-formula-option-editor {
+  display: grid;
+  min-width: 190px;
+  gap: 7px;
+}
+.recap-formula-option-editor .recap-select-field { min-width: 0; max-width: none; }
+.recap-formula-selected-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(110px, 1fr) 26px;
+  align-items: center;
+  gap: 6px;
+  padding: 7px;
+  border: 1px solid #E8E8E8;
+  border-radius: 7px;
+  background: #FAFAFA;
+}
+.recap-formula-selected-item > span {
+  min-width: 0;
+  color: #444;
+  font-size: 10px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.recap-formula-selected-item select {
+  width: 100%;
+  min-width: 0;
+  min-height: 30px;
+  padding: 0 6px;
+  border: 1px solid #E3E3E3;
+  border-radius: 6px;
+  background: #FFF;
+  color: #555;
+  font: inherit;
+  font-size: 9px;
+}
+.recap-formula-selected-item small { color: #777; font-size: 9px; }
+.recap-formula-remove {
+  width: 26px;
+  height: 26px;
+  border: 1px solid #E5E5E5;
+  border-radius: 6px;
+  background: #FFF;
+  color: #777;
+  cursor: pointer;
+  font-size: 17px;
+  line-height: 1;
+}
+.recap-formula-remove:hover { border-color: #D8B4B4; background: #FFF5F5; color: #A33; }
+
+/* Qty field in the Material Tambahan table. */
+.recap-extra-quantity {
+  box-sizing: border-box;
+  width: 82px;
+  min-width: 64px;
+  height: 34px;
+  padding: 0 8px;
+  border: 1px solid #E2E2E2;
+  border-radius: 7px;
+  outline: none;
+  background: #FFF;
+  color: #252525;
+  font: inherit;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.recap-extra-quantity:hover { border-color: #BDBDBD; }
+.recap-extra-quantity:focus {
+  border-color: #777;
+  box-shadow: 0 0 0 3px #F0F0F0;
+}
+@media (max-width: 720px) {
+  .recap-formula-selected-item { grid-template-columns: minmax(0, 1fr) 26px; }
+  .recap-formula-selected-item select,
+  .recap-formula-selected-item small { grid-column: 1; grid-row: 2; }
+  .recap-formula-remove { grid-column: 2; grid-row: 1 / span 2; }
+  .recap-extra-quantity { width: 74px; }
+}
