@@ -121,6 +121,7 @@ export function CalculatorPage() {
     draft.lines.map((line, index) => ({
       modelIndex: index + 1,
       modelName: catalog.get(line.modelCode)?.name ?? `Model ${line.modelCode}`,
+      modelCode: line.modelCode,
       materials: (results.get(line.id ?? `${line.modelCode}`)?.items ?? []).map((material) => {
         const family = materialFamily(material.name, material.unit);
         const inferredCatalog = catalogForFamily(family, budgetCatalogs);
