@@ -73,6 +73,7 @@ describe("project service", () => {
       lines: [{ modelCode: 10100, inputs: { T1: 2000, L1: 1754 }, count: 1 }],
       prices: {},
       recap: [{
+        modelIndex: 1,
         materialCode: 10101, name: "kusen", unit: "m'", quantity: 5.754,
         priceKey: "catalog-1:variant-1:10101:component-1", catalogId: "catalog-1",
         variantId: "variant-1", unitPrice: 125000, subtotal: 719250,
