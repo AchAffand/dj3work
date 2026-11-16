@@ -126,7 +126,7 @@ export function createProjectService(
       });
 
       const recap = draft.recap ? [...draft.recap] : aggregateMaterials(
-        lines.map((line, index) => ({ modelIndex: index + 1, materials: line.resultSnapshot.items, modelCount: line.count })),
+        lines.map((line, index) => ({ modelIndex: index + 1, modelName: catalog.get(line.modelCode)?.name ?? `Model ${line.modelCode}`, materials: line.resultSnapshot.items, modelCount: line.count })),
         draft.prices,
       );
       const prices: ProjectPriceInput[] = recap.map((row) => ({
