@@ -12,7 +12,7 @@ import { createProjectService, type MaterialSelection, type ProjectDraft, type P
 import { ModelLineEditor } from "./ModelLineEditor";
 import { budgetPriceForMaterial } from "../../domain/budgets/pricing";
 import type { BudgetCatalogDetail } from "../../domain/budgets/types";
-import { catalogForFamily, formulaOptionMaterialKey, materialFamily, parseFormulaOptionMaterialKey, relatedMaterialComponents, supportsMultipleBudgetComponents } from "../recap/materialSelection";
+import { catalogForFamily, materialFamily, parseFormulaOptionMaterialKey, relatedMaterialComponents, supportsMultipleBudgetComponents } from "../recap/materialSelection";
 
 function makeLine(modelCode: number): ProjectLineDraft {
   return {
@@ -174,7 +174,7 @@ export function CalculatorPage() {
       modelCount: line.count,
     })),
     draft.prices,
-  ), [budgetDetails, draft.lines, draft.materialSelections, draft.prices, results]);
+  ), [budgetDetails, draft.extraMaterials, draft.lines, draft.materialSelections, draft.prices, results]);
   const extraMaterials = (draft.extraMaterials ?? []) as ProjectExtraMaterial[];
   const syncedExtraMaterials = extraMaterials.filter((item) => {
     if (item.name.startsWith("__door_finish__:")) return recap.some((row) => row.materialCode === Number(item.name.split(":")[1]));
