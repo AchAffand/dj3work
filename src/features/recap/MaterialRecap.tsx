@@ -73,7 +73,7 @@ export function MaterialRecap({ rows, total, budgetCatalogs, budgetDetails, onSe
 
                 return (
                   <Fragment key={`${row.modelIndex}-${row.materialCode}-${row.unit}-${row.priceKey}`}>
-                    {row.modelIndex !== previousRow?.modelIndex && <tr className="recap-model-divider"><td colSpan={5}><div className="recap-model-heading"><span className="recap-model-number">{String(row.modelIndex).padStart(2, "0")}</span><span className="recap-model-label">MODEL</span><span className="recap-model-name">{row.modelName ? `“${row.modelName}”` : `Kode model ${row.modelIndex}`}</span><span className="recap-model-rule" /></div></td></tr>}
+                    {row.modelIndex !== previousRow?.modelIndex && <tr className="recap-model-divider"><td colSpan={5}><div className="recap-model-heading"><span className="recap-model-number">[{String(row.modelIndex).padStart(2, "0")}]</span><span className="recap-model-label">Model</span><span className="recap-model-name">- {row.modelCode ?? "—"} ({row.modelName ?? "Nama model tidak tersedia"})</span><span className="recap-model-rule" /></div></td></tr>}
                     <tr>
                     <td><span className="recap-material-name">{row.name}</span><small className="recap-material-code">{row.materialCode} · {row.unit}</small></td>
                     <td className="recap-quantity">{formatQuantity(row.quantity)} <span>{row.unit}</span></td>
