@@ -66,7 +66,7 @@ export type ProjectInput = {
   extraMaterials?: ProjectExtraMaterial[];
 };
 
-export type Project = ProjectInput & { id: string; createdAt?: string; updatedAt?: string };
+export type Project = ProjectInput & { id: string; offerNumber?: number; createdAt?: string; updatedAt?: string };
 export type ProjectSummary = { id: string; name: string; createdAt?: string; updatedAt: string; modelCount: number; createdBy?: string };
 
 export type FormulaChange = { materialCode: number; expression: string };
