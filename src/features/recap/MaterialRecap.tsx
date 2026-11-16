@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { formatQuantity, formatRupiah } from "../../app/format";
 import type { BudgetCatalog, BudgetCatalogDetail } from "../../domain/budgets/types";
 import type { MaterialSelection } from "../projects/projectService";
@@ -55,7 +56,8 @@ export function MaterialRecap({ rows, total, budgetCatalogs, budgetDetails, onSe
           <table className="recap-table">
             <thead><tr><th>Material</th><th>Kebutuhan</th><th>Pilihan material</th><th>Harga satuan</th><th>Jumlah</th></tr></thead>
             <tbody>
-              {rows.map((row) => {
+              {rows.map((row, rowIndex) => {
+                const previousRow = rows[rowIndex - 1];
                 const family = materialFamily(row.name, row.unit);
                 const inferredCatalog = catalogForFamily(family, budgetCatalogs);
                 const catalogId = inferredCatalog?.id ?? row.catalogId ?? "";
@@ -70,7 +72,9 @@ export function MaterialRecap({ rows, total, budgetCatalogs, budgetDetails, onSe
                 });
 
                 return (
-                  <tr key={`${row.materialCode}-${row.unit}-${row.priceKey}`}>
+                  <Fragment key={`${row.modelIndex}-${row.materialCode}-${row.unit}-${row.priceKey}`}>
+                    {row.modelIndex !== previousRow?.modelIndex && <tr className="recap-model-divider"><th colSpan={5}>MODEL {String(row.modelIndex).padStart(2, "0")}</th></tr>}
+                    <tr>
                     <td><span className="recap-material-name">{row.name}</span><small className="recap-material-code">{row.materialCode} · {row.unit}</small></td>
                     <td className="recap-quantity">{formatQuantity(row.quantity)} <span>{row.unit}</span></td>
                     <td>
@@ -166,13 +170,27 @@ export function MaterialRecap({ rows, total, budgetCatalogs, budgetDetails, onSe
                               {budgetCatalogs.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
                             </select>
                           </label>
-                          <label className="recap-select-field">
-                            <span className="sr-only">Varian atau merek {row.name}</span>
-                            <select value={row.variantId ?? ""} disabled={!detail || detail.variants.length === 0} onChange={(event) => selection({ variantId: event.target.value || null })}>
-                              <option value="">Pilih varian</option>
-                              {(detail?.variants ?? []).map((variant) => <option key={variant.id} value={variant.id}>{variant.label}</option>)}
-                            </select>
-                          </label>
+                          {detail && detail.components.length > 0 && (
+                            <label className="recap-select-field">
+                              <span className="sr-only">Pilih item katalog untuk {row.name}</span>
+                              <select value={row.componentId ?? ""} onChange={(event) => selection({
+                                componentId: event.target.value || null,
+                                variantId: detail.variants.length === 1 ? detail.variants[0].id : row.variantId,
+                              })}>
+                                <option value="">Pilih item katalog</option>
+                                {detail.components.map((component) => <option key={component.id} value={component.id}>{componentLabel(component)}</option>)}
+                              </select>
+                            </label>
+                          )}
+                          {detail && detail.variants.length > 1 && (
+                            <label className="recap-select-field">
+                              <span className="sr-only">Varian harga {row.name}</span>
+                              <select value={row.variantId ?? ""} onChange={(event) => selection({ variantId: event.target.value || null })}>
+                                <option value="">Pilih varian harga</option>
+                                {detail.variants.map((variant) => <option key={variant.id} value={variant.id}>{variant.label}</option>)}
+                              </select>
+                            </label>
+                          )}
                         </div>
                       )}
                     </td>
@@ -188,6 +206,8 @@ export function MaterialRecap({ rows, total, budgetCatalogs, budgetDetails, onSe
                     </td>
                     <td className="recap-subtotal">{row.subtotal === null ? <span className="unpriced-label">Pilih spesifikasi</span> : formatRupiah(row.subtotal)}</td>
                   </tr>
+
+                  </Fragment>
                 );
               })}
             </tbody>
