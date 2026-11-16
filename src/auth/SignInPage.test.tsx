@@ -9,6 +9,6 @@ vi.mock("./AuthProvider", () => ({
 describe("SignInPage branding", () => {
   it("shows the DJ3 Engineering logo", () => {
     render(<SignInPage />);
-    expect(screen.getByRole("img", { name: "DJ3 Engineering" })).toHaveAttribute("src", "/dj3-engineering-logo.png");
+    expect(screen.getByRole("img", { name: "DJ3 Engineering" })).toHaveAttribute("src", "/dj3work/logodj3hitam.png");
   });
 });
