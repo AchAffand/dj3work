@@ -38,6 +38,7 @@ const project: Project = {
     id: "4f3c6c08-4bd0-4c5f-9a33-8f59eabbb001",
     name: "HANDLE + KUNCI", unit: "SET", quantity: 2,
     catalogId: null, variantId: null, componentId: "handle-lock", unitPrice: 125000,
+    modelLineId: "line-1",
   }],
 };
 
@@ -45,7 +46,7 @@ describe("ProjectPrintPage", () => {
   beforeEach(() => vi.stubGlobal("print", vi.fn()));
   afterEach(() => vi.unstubAllGlobals());
 
-  it("prints the Excel-style project recap with author, metadata and seven material columns", async () => {
+  it("prints per-model quotation cards, with the DJ3 logo and two-line title", async () => {
     const repository = { loadProject: vi.fn(async () => project) } as unknown as ReturnType<typeof createSupabaseRepository>;
     render(
       <AppServicesProvider override={{
@@ -63,30 +64,16 @@ describe("ProjectPrintPage", () => {
     );
 
     expect(await screen.findByText("Rumah Contoh")).toBeInTheDocument();
-    expect(screen.getByText("REKAP PEKERJAAN PINTU")).toBeInTheDocument();
-    expect(screen.getByText("Dibuat : Operator DJ3")).toBeInTheDocument();
-    expect(screen.getByText("Project")).toBeInTheDocument();
-    expect(screen.getByText("Lokasi")).toBeInTheDocument();
-    expect(screen.getByText("Lantai")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /Penawaran Harga/ })).toBeInTheDocument();
+    expect(screen.getByAltText("DJ3 Engineering")).toHaveAttribute("src", "/dj3work/dj3-engineering-logo.svg");
     expect(screen.getByText("Bandung")).toBeInTheDocument();
     expect(screen.getByText("2", { selector: "dd" })).toBeInTheDocument();
-    expect(screen.getByText("Tgl:", { exact: false })).toBeInTheDocument();
-    expect(screen.getByText("10101 · Harga manual")).toBeInTheDocument();
+    expect(screen.getByText("PINTU", { exact: false })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "HARGA SAT" })).toBeInTheDocument();
     expect(screen.getByText("HANDLE + KUNCI")).toBeInTheDocument();
-    expect(screen.getByText("MATERIAL TAMBAHAN")).toBeInTheDocument();
-    for (const heading of ["TYPE", "ITEM", "QTY", "HARG SAT", "SATUAN", "SUB TOTAL", "GRAND TOTAL"]) {
-      expect(screen.getByRole("columnheader", { name: heading })).toBeInTheDocument();
-    }
-    expect(screen.getByRole("cell", { name: /PINTU.*10100/ })).toBeInTheDocument();
-    expect(screen.getAllByRole("cell", { name: /11,508/ })).toHaveLength(2);
-    expect(document.querySelector(".grand-total-merged")).not.toHaveAttribute("rowspan");
-    expect(document.querySelector(".grand-total-row")).toBeInTheDocument();
-    expect(document.querySelector(".grand-total-spacer")).toHaveAttribute("colspan", "6");
-    expect(document.querySelector(".grand-total-spacer")).toHaveClass("grand-total-spacer");
-    expect(document.querySelector(".grand-total-merged")).toHaveClass("grand-total-merged");
-    expect(document.querySelector(".grand-total-value")).toBeInTheDocument();
     expect(screen.getByText(/Rp\s*575\.400/)).toBeInTheDocument();
-    expect(screen.getByText(/Rp\s*825\.400/)).toBeInTheDocument();
+    expect(screen.getByText(/Rp\s*250\.000/)).toBeInTheDocument();
+    expect(screen.getByText(/Operator DJ3 · DJ3 ENGINEERING/)).toBeInTheDocument();
     await userEvent.setup().click(screen.getByRole("button", { name: "Cetak / Simpan PDF" }));
     expect(window.print).toHaveBeenCalledOnce();
   });
