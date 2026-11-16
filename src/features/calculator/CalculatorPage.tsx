@@ -143,28 +143,28 @@ export function CalculatorPage() {
         });
         const selection = {
           ...savedSelection,
-          catalogId: inferredCatalog?.id ?? savedSelection.catalogId,
+          catalogId: savedSelection.catalogId ?? inferredCatalog?.id,
         };
         const detail = selection.catalogId ? budgetDetails.get(selection.catalogId) : undefined;
         const componentOptions = relatedMaterialComponents(detail, family, material.name);
-        const componentId = multiSelectable ? null : selection.componentId ?? (family !== "other" && componentOptions.length === 1 ? componentOptions[0].id : null);
+        const componentId = selection.componentId ?? (family !== "other" && !multiSelectable && componentOptions.length === 1 ? componentOptions[0].id : null);
         const variantId = selection.variantId ?? savedFormulaOption?.variantId ?? (family !== "aluminium" && detail?.variants.length === 1 ? detail.variants[0].id : null);
         const resolvedSelection = { ...selection, componentId, variantId };
         const variant = detail?.variants.find((item) => item.id === resolvedSelection.variantId);
         const requiresComponentChoice = !multiSelectable && family !== "other" && componentOptions.length > 1 && !resolvedSelection.componentId;
-        const mapped = multiSelectable || requiresComponentChoice
+        const mapped = (multiSelectable && !resolvedSelection.componentId) || requiresComponentChoice
           ? null
           : budgetPriceForMaterial(detail, material.materialCode, material.name, material.unit, resolvedSelection.variantId, null, null, null, null, null, resolvedSelection.componentId);
         return {
           ...material,
-          priceKey: multiSelectable ? `formula-options-base:${modelIndex}:${material.materialCode}` : mapped?.priceKey ?? (detail && variant && resolvedSelection.componentId ? `${detail.catalog.id}:${variant.id}:${material.materialCode}:${resolvedSelection.componentId}` : `manual:${material.materialCode}`),
+          priceKey: mapped?.priceKey ?? (detail && variant && resolvedSelection.componentId ? `${detail.catalog.id}:${variant.id}:${material.materialCode}:${resolvedSelection.componentId}` : multiSelectable ? `formula-options-base:${modelIndex}:${material.materialCode}` : `manual:${material.materialCode}`),
           catalogId: selection.catalogId,
           variantId: resolvedSelection.variantId,
-          unitPrice: multiSelectable ? null : mapped?.unitPrice ?? null,
+          unitPrice: mapped?.unitPrice ?? null,
           priceVersion: mapped?.priceVersion ?? null,
           expressionSnapshot: mapped?.expressionSnapshot ?? null,
-          componentId: multiSelectable ? null : mapped?.componentId ?? resolvedSelection.componentId ?? null,
-          priceSourceLabel: multiSelectable ? "Pilihan item Master Harga" : mapped?.priceSourceLabel ?? (detail && variant ? `${detail.catalog.label} · ${variant.label}` : "Harga manual"),
+          componentId: mapped?.componentId ?? resolvedSelection.componentId ?? null,
+          priceSourceLabel: mapped?.priceSourceLabel ?? (multiSelectable ? "Pilihan item Master Harga" : detail && variant ? `${detail.catalog.label} · ${variant.label}` : "Harga manual"),
         };
       }),
       modelCount: line.count,
