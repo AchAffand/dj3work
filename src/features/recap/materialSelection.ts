@@ -8,9 +8,9 @@ const normalize = (value: string) => value.normalize("NFKC").trim().replace(/\s+
 export type FormulaOptionMaterialReference = { modelIndex: number; materialCode: number; componentId: string };
 
 export function supportsMultipleBudgetComponents(materialName: string): boolean {
-  const normalized = normalize(materialName).replace(/\\s*\\/\\s*/g, "/");
+  const normalized = normalize(materialName).replace(/\s*\/\s*/g, "/");
   return normalized === "kaca/jendela"
-    || /^kaca\\/acp\\/sp(?:andrel|ndrel|andrell)\\/pintu$/.test(normalized);
+    || /^kaca\/acp\/sp(?:andrel|ndrel|andrell)\/pintu$/.test(normalized);
 }
 
 export function formulaOptionMaterialKey(modelIndex: number, materialCode: number, componentId: string): string {
@@ -18,7 +18,7 @@ export function formulaOptionMaterialKey(modelIndex: number, materialCode: numbe
 }
 
 export function parseFormulaOptionMaterialKey(value: string): FormulaOptionMaterialReference | null {
-  const match = /^__formula_option__:(\\d+):(\\d+):([0-9a-f-]+)$/i.exec(value);
+  const match = /^__formula_option__:(\d+):(\d+):([0-9a-f-]+)$/i.exec(value);
   if (!match) return null;
   return { modelIndex: Number(match[1]), materialCode: Number(match[2]), componentId: match[3] };
 }
