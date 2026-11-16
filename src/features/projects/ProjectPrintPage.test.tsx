@@ -65,7 +65,7 @@ describe("ProjectPrintPage", () => {
 
     expect(await screen.findByText("Rumah Contoh")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /Penawaran Harga/ })).toBeInTheDocument();
-    expect(screen.getByAltText("DJ3 Engineering")).toHaveAttribute("src", "/dj3work/logodj3merah.png");
+    expect(screen.getByAltText("DJ3 Engineering")).toHaveAttribute("src", "/dj3work/logodj3merah.png?v=20261116");
     expect(screen.getByText("Bandung")).toBeInTheDocument();
     expect(screen.getByText("2", { selector: "dd" })).toBeInTheDocument();
     expect(screen.getByText("PINTU", { exact: false })).toBeInTheDocument();
