@@ -18,7 +18,7 @@ import {
 
 type MaterialRecapProps = {
   rows: readonly MaterialRecapRow[];
-  modelLines: { id: string; modelIndex: number; modelCode: number; modelName: string; modelCount: number }[];
+  modelLines: { id: string; modelIndex: number; modelCode: number; modelName: string; modelCount: number; formulaMaterials?: { code: number; name: string; unit: string; quantity?: number; error?: string }[] }[];
   total: number;
   budgetCatalogs: readonly BudgetCatalog[];
   budgetDetails: ReadonlyMap<string, BudgetCatalogDetail>;
@@ -34,6 +34,31 @@ function createMaterialId(): string {
     const random = Math.floor(Math.random() * 16);
     return (char === "x" ? random : (random & 0x3) | 0x8).toString(16);
   });
+}
+
+type FormulaMaterialChoice = { code: number; name: string; unit: string; quantity?: number; error?: string; score: number };
+
+function normalizeFormulaMatch(value: string): string {
+  return value.normalize("NFKC").toLocaleLowerCase("id-ID")
+    .replace(/tempered/g, "temp")
+    .replace(/spandrell?/g, "spandrel")
+    .replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+function formulaChoicesForComponent(
+  component: { label: string; category: string },
+  materials: { code: number; name: string; unit: string; quantity?: number; error?: string }[],
+): FormulaMaterialChoice[] {
+  const stopWords = new Set(["dan", "atau", "untuk", "material", "profil", "warna", "finishing", "aluminium", "almunium"]);
+  const words = normalizeFormulaMatch(component.label).split(" ").filter((word) => word.length > 1 && !stopWords.has(word));
+  const category = normalizeFormulaMatch(component.category);
+  return materials.map((material) => {
+    const materialWords = normalizeFormulaMatch(material.name).split(" ");
+    const score = words.reduce((sum, word) => sum + (materialWords.includes(word) ? 1 : 0), 0);
+    const categoryMatch = category === "kaca" && materialWords.includes("kaca");
+    return { ...material, score: score + (categoryMatch ? 0.25 : 0) };
+  }).filter((material) => material.score > 0)
+    .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
 }
 
 function displayMaterialName(name: string): string {
@@ -56,6 +81,7 @@ export function MaterialRecap({ rows, modelLines, total, budgetCatalogs, budgetD
   const [selectedComponentId, setSelectedComponentId] = useState("");
   const [selectedVariantId, setSelectedVariantId] = useState("");
   const [quantityPerModel, setQuantityPerModel] = useState("1");
+  const [selectedFormulaMaterialCode, setSelectedFormulaMaterialCode] = useState("");
   const missingPrices = rows.filter((row) => row.unitPrice === null).length
     + extraMaterials.filter((item) => item.unitPrice === null && item.componentId).length;
   const visibleExtraMaterials = extraMaterials.filter((item) =>
@@ -66,20 +92,33 @@ export function MaterialRecap({ rows, modelLines, total, budgetCatalogs, budgetD
   const selectedCatalogDetail = selectedCatalogId ? budgetDetails.get(selectedCatalogId) : undefined;
   const selectedComponent = selectedCatalogDetail?.components.find((item) => item.id === selectedComponentId);
   const selectedVariant = selectedCatalogDetail?.variants.find((item) => item.id === selectedVariantId);
+  const formulaChoices = selectedComponent && activeModelLine
+    ? formulaChoicesForComponent(selectedComponent, activeModelLine.formulaMaterials ?? [])
+    : [];
+  const topFormulaChoice = formulaChoices.length > 1 && formulaChoices[0].score > formulaChoices[1].score
+    ? formulaChoices[0]
+    : formulaChoices.length === 1 ? formulaChoices[0] : undefined;
+  const selectedFormulaMaterial = formulaChoices.find((item) => String(item.code) === selectedFormulaMaterialCode) ?? topFormulaChoice;
+  const formulaQuantity = selectedFormulaMaterial?.quantity;
+  const formulaQuantityReady = Boolean(selectedFormulaMaterial && typeof formulaQuantity === "number" && Number.isFinite(formulaQuantity));
   const selectedPrice = selectedComponent && selectedVariantId
     ? budgetPriceForMaterial(selectedCatalogDetail, -999999, selectedComponent.label, selectedComponent.unit, selectedVariantId, null, null, null, null, null, selectedComponent.id)
     : null;
   const openAddMaterial = (modelLineId: string) => {
-    setSelectedCatalogId(""); setSelectedComponentId(""); setSelectedVariantId(""); setQuantityPerModel("1");
+    setSelectedCatalogId(""); setSelectedComponentId(""); setSelectedVariantId(""); setQuantityPerModel("1"); setSelectedFormulaMaterialCode("");
     setPendingModelId(modelLineId);
   };
   const confirmAddMaterial = () => {
     if (!activeModelLine || !selectedCatalogDetail || !selectedComponent || !selectedVariantId) return;
-    const quantity = Number(quantityPerModel);
-    if (!Number.isFinite(quantity) || quantity <= 0) return;
+    const quantity = selectedFormulaMaterial
+      ? formulaQuantityReady ? formulaQuantity! : NaN
+      : Number(quantityPerModel);
+    if (!Number.isFinite(quantity) || quantity < 0 || (!selectedFormulaMaterial && quantity === 0)) return;
     onExtraMaterialsChange([...extraMaterials, {
-      id: createMaterialId(), modelLineId: activeModelLine.id, name: selectedComponent.label,
-      unit: selectedComponent.unit, quantity, catalogId: selectedCatalogDetail.catalog.id,
+      id: createMaterialId(), modelLineId: activeModelLine.id,
+      formulaMaterialCode: selectedFormulaMaterial?.code ?? null,
+      name: selectedComponent.label,
+      unit: selectedFormulaMaterial?.unit ?? selectedComponent.unit, quantity, catalogId: selectedCatalogDetail.catalog.id,
       variantId: selectedVariantId, componentId: selectedComponent.id,
       unitPrice: selectedPrice?.unitPrice ?? null, priceVersion: selectedPrice?.priceVersion ?? null,
       expressionSnapshot: selectedPrice?.expressionSnapshot ?? null,
@@ -297,8 +336,8 @@ export function MaterialRecap({ rows, modelLines, total, budgetCatalogs, budgetD
                       <tr className="recap-extra-material-row" key={item.id}>
                         <td><span className="recap-material-name">{item.name}</span><small className="recap-material-code">Material tambahan · {item.unit}</small></td>
                         <td className="recap-quantity">
-                          <input className="recap-extra-quantity" aria-label={"Qty per unit " + item.name} type="number" min="0.0001" step="any" value={item.quantity} onChange={(event) => onExtraMaterialsChange(extraMaterials.map((current) => current.id === item.id ? { ...current, quantity: Math.max(0.0001, Number(event.target.value) || 0.0001) } : current))} />
-                          <small>{formatQuantity(item.quantity)} × {modelLine.modelCount} = {formatQuantity(modelQuantity)} {item.unit}</small>
+                          <input className="recap-extra-quantity" aria-label={"Qty per unit " + item.name} type="number" min="0.0001" step="any" readOnly={Boolean(item.formulaMaterialCode)} value={item.quantity} onChange={(event) => onExtraMaterialsChange(extraMaterials.map((current) => current.id === item.id ? { ...current, quantity: Math.max(0.0001, Number(event.target.value) || 0.0001) } : current))} />
+                          <small>{item.formulaMaterialCode ? "Mengikuti rumus model" : "Qty manual"} · {formatQuantity(item.quantity)} × {modelLine.modelCount} = {formatQuantity(modelQuantity)} {item.unit}</small>
                         </td>
                         <td><div className="recap-selection-stack"><span>{detail?.catalog.label ?? "Katalog"} · {variant?.label ?? "Varian belum dipilih"}</span></div></td>
                         <td>{item.unitPrice === null ? <span className="unpriced-label">Harga belum tersedia</span> : formatRupiah(item.unitPrice)}</td>
@@ -354,6 +393,7 @@ export function MaterialRecap({ rows, modelLines, total, budgetCatalogs, budgetD
               <label><span>Pilih item katalog</span>
                 <select value={selectedComponentId} disabled={!selectedCatalogDetail} onChange={(event) => {
                   setSelectedComponentId(event.target.value);
+                  setSelectedFormulaMaterialCode("");
                   setSelectedVariantId(selectedCatalogDetail?.variants.length === 1 ? selectedCatalogDetail.variants[0].id : "");
                 }}>
                   <option value="">Pilih item katalog</option>
@@ -366,14 +406,30 @@ export function MaterialRecap({ rows, modelLines, total, budgetCatalogs, budgetD
                   {selectedCatalogDetail?.variants.map((variant) => <option key={variant.id} value={variant.id}>{variant.label}</option>)}
                 </select>
               </label>
+              {formulaChoices.length > 1 && (
+                <label><span>Sumber rumus model</span>
+                  <select value={selectedFormulaMaterial ? String(selectedFormulaMaterial.code) : selectedFormulaMaterialCode} onChange={(event) => setSelectedFormulaMaterialCode(event.target.value)}>
+                    <option value="">Pilih sumber rumus</option>
+                    {formulaChoices.map((material) => <option key={material.code} value={material.code}>{material.name} · {material.code}</option>)}
+                  </select>
+                </label>
+              )}
               <label><span>Kebutuhan per satu unit model</span>
-                <div className="recap-extra-modal-quantity"><input type="number" min="0.0001" step="any" value={quantityPerModel} onChange={(event) => setQuantityPerModel(event.target.value)} /><span>{selectedComponent?.unit ?? "Satuan"}</span></div>
+                {selectedFormulaMaterial ? (
+                  <div className="recap-extra-modal-quantity">
+                    <input type="number" readOnly value={formulaQuantityReady ? String(formulaQuantity) : ""} placeholder={selectedFormulaMaterial.error ?? "Lengkapi ukuran model"} />
+                    <span>{selectedFormulaMaterial.unit}</span>
+                  </div>
+                ) : (
+                  <div className="recap-extra-modal-quantity"><input type="number" min="0.0001" step="any" value={quantityPerModel} onChange={(event) => setQuantityPerModel(event.target.value)} /><span>{selectedComponent?.unit ?? "Satuan"}</span></div>
+                )}
+                {selectedFormulaMaterial && <small className="recap-extra-formula-note">Mengikuti rumus {selectedFormulaMaterial.name} pada Model {activeModelLine.modelCode}. Qty akan dihitung ulang saat ukuran model berubah.</small>}
               </label>
             </div>
             {selectedComponent && selectedVariant && <div className="recap-extra-price-preview"><span>{selectedComponent.label} · {selectedVariant.label}</span><strong>{selectedPrice?.unitPrice == null ? "Harga belum tersedia" : formatRupiah(selectedPrice.unitPrice) + " / " + selectedComponent.unit}</strong></div>}
             <div className="formula-modal-actions formula-confirm-actions">
               <button className="secondary-button" type="button" onClick={() => setPendingModelId(null)}>Batal</button>
-              <button className="primary-button" type="button" disabled={!selectedCatalogId || !selectedComponentId || !selectedVariantId || !Number.isFinite(Number(quantityPerModel)) || Number(quantityPerModel) <= 0} onClick={confirmAddMaterial}>Konfirmasi</button>
+              <button className="primary-button" type="button" disabled={!selectedCatalogId || !selectedComponentId || !selectedVariantId || (selectedFormulaMaterial ? !formulaQuantityReady || formulaQuantity! < 0 : !Number.isFinite(Number(quantityPerModel)) || Number(quantityPerModel) <= 0) || (formulaChoices.length > 1 && !selectedFormulaMaterial)} onClick={confirmAddMaterial}>Konfirmasi</button>
             </div>
           </section>
         </div>

@@ -179,6 +179,12 @@ export function CalculatorPage() {
     return !option || recap.some((row) => row.modelIndex === option.modelIndex && row.materialCode === option.materialCode);
   }).map((item) => {
     const formulaOption = parseFormulaOptionMaterialKey(item.name);
+    if (item.formulaMaterialCode && item.modelLineId) {
+      const sourceLine = draft.lines.find((line) => (line.id ?? "") === item.modelLineId);
+      const sourceResult = sourceLine ? results.get(sourceLine.id ?? String(sourceLine.modelCode)) : undefined;
+      const sourceMaterial = sourceResult?.items.find((material) => material.materialCode === item.formulaMaterialCode);
+      return { ...item, quantity: sourceMaterial?.quantity ?? 0 };
+    }
     if (formulaOption) {
       const sourceRow = recap.find((row) => row.modelIndex === formulaOption.modelIndex && row.materialCode === formulaOption.materialCode);
       return sourceRow ? { ...item, quantity: sourceRow.quantity, variantId: sourceRow.variantId } : item;
@@ -297,7 +303,21 @@ export function CalculatorPage() {
         <aside className="calculator-right-column">
           <MaterialRecap
             rows={recap}
-            modelLines={draft.lines.map((line, index) => ({ id: line.id ?? `${line.modelCode}-${index}`, modelIndex: index + 1, modelCode: line.modelCode, modelName: catalog.get(line.modelCode)?.name ?? `Model ${line.modelCode}`, modelCount: line.count }))}
+            modelLines={draft.lines.map((line, index) => {
+              const lineId = line.id ?? `${line.modelCode}-${index}`;
+              const model = catalog.get(line.modelCode);
+              const result = results.get(line.id ?? `${line.modelCode}`);
+              return {
+                id: line.id ?? lineId, modelIndex: index + 1, modelCode: line.modelCode,
+                modelName: model?.name ?? `Model ${line.modelCode}`, modelCount: line.count,
+                formulaMaterials: (model?.materials ?? []).filter((material) => material.expression !== null)
+                  .map((material) => {
+                    const calculated = result?.items.find((item) => item.materialCode === material.code);
+                    const error = result?.errors.find((item) => item.materialCode === material.code);
+                    return { code: material.code, name: material.name, unit: material.unit, quantity: calculated?.quantity, error: error?.reason };
+                  }),
+              };
+            })}
             total={total}
             extraMaterials={pricedExtraMaterials}
             onExtraMaterialsChange={(items) => setDraft((current) => ({ ...current, extraMaterials: items }))}

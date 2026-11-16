@@ -44,6 +44,7 @@ export type ProjectPriceInput = {
 export type ProjectExtraMaterial = {
   id: string;
   modelLineId?: string | null;
+  formulaMaterialCode?: number | null;
   name: string;
   unit: string;
   quantity: number;
