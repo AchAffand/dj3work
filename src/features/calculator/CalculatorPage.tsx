@@ -173,6 +173,7 @@ export function CalculatorPage() {
   ), [budgetDetails, draft.extraMaterials, draft.lines, draft.materialSelections, draft.prices, results]);
   const extraMaterials = (draft.extraMaterials ?? []) as ProjectExtraMaterial[];
   const syncedExtraMaterials = extraMaterials.filter((item) => {
+    if (item.modelLineId && !draft.lines.some((line) => line.id === item.modelLineId)) return false;
     if (item.name.startsWith("__door_finish__:")) return recap.some((row) => row.materialCode === Number(item.name.split(":")[1]));
     const option = parseFormulaOptionMaterialKey(item.name);
     return !option || recap.some((row) => row.modelIndex === option.modelIndex && row.materialCode === option.materialCode);
@@ -187,13 +188,18 @@ export function CalculatorPage() {
     const sourceRow = recap.find((row) => row.materialCode === materialCode);
     return sourceRow ? { ...item, quantity: sourceRow.quantity, variantId: sourceRow.variantId } : item;
   });
+  const modelCountById = new Map(draft.lines.map((line) => [line.id ?? "", line.count]));
   const pricedExtraMaterials = syncedExtraMaterials.map((item, index) => {
     const detail = item.catalogId ? budgetDetails.get(item.catalogId) : undefined;
     const price = budgetPriceForMaterial(detail, -100000 - index, item.name, item.unit, item.variantId, null, null, null, null, null, item.componentId);
     return { ...item, unitPrice: price?.unitPrice ?? item.unitPrice, priceVersion: price?.priceVersion ?? item.priceVersion ?? null, expressionSnapshot: price?.expressionSnapshot ?? item.expressionSnapshot ?? null };
   });
   const total = recap.reduce((sum, row) => sum + (row.subtotal ?? 0), 0)
-    + pricedExtraMaterials.reduce((sum, item) => sum + (item.unitPrice === null ? 0 : item.quantity * item.unitPrice), 0);
+    + pricedExtraMaterials.reduce((sum, item) => {
+      if (item.unitPrice === null) return sum;
+      const modelCount = item.modelLineId ? (modelCountById.get(item.modelLineId) ?? 1) : 1;
+      return sum + item.quantity * modelCount * item.unitPrice;
+    }, 0);
 
   const updateLine = useCallback((lineId: string, updated: ProjectLineDraft) => {
     setDraft((current) => ({
@@ -291,6 +297,7 @@ export function CalculatorPage() {
         <aside className="calculator-right-column">
           <MaterialRecap
             rows={recap}
+            modelLines={draft.lines.map((line, index) => ({ id: line.id ?? `${line.modelCode}-${index}`, modelIndex: index + 1, modelCode: line.modelCode, modelName: catalog.get(line.modelCode)?.name ?? `Model ${line.modelCode}`, modelCount: line.count }))}
             total={total}
             extraMaterials={pricedExtraMaterials}
             onExtraMaterialsChange={(items) => setDraft((current) => ({ ...current, extraMaterials: items }))}

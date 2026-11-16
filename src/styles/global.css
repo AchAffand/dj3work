@@ -1130,3 +1130,25 @@ h1 { margin: 0; color: var(--ink); font-size: clamp(28px, 3vw, 37px); font-weigh
   .recap-formula-remove { grid-column: 2; grid-row: 1 / span 2; }
   .recap-extra-quantity { width: 74px; }
 }
+
+
+/* Per-model extra material selector and recap rows. */
+.recap-model-heading { flex-wrap: wrap; }
+.recap-add-model-material { min-height: 30px; margin-left: auto; padding: 0 10px; font-size: 10px; white-space: nowrap; }
+.recap-extra-material-row > td { background: #FAFAFA; }
+.recap-extra-material-row .recap-selection-stack { min-width: 0; }
+.recap-extra-material-row .recap-quantity { min-width: 125px; }
+.recap-extra-material-row .recap-quantity small { display: block; margin-top: 4px; color: #777; font-size: 9px; white-space: nowrap; }
+.recap-extra-remove { display: inline-grid; width: 22px; height: 22px; margin-left: 5px; place-items: center; border: 1px solid #E5E5E5; border-radius: 6px; background: #FFF; color: #777; cursor: pointer; font-size: 15px; line-height: 1; }
+.recap-extra-remove:hover { border-color: #D8B4B4; background: #FFF5F5; color: #A33; }
+.recap-extra-modal { width: min(560px, calc(100vw - 32px)); }
+.recap-extra-modal-description { margin: 8px 0 18px; color: #737373; font-size: 12px; line-height: 1.55; }
+.recap-extra-modal-fields { display: grid; gap: 13px; }
+.recap-extra-modal-fields > label { display: grid; gap: 6px; color: #4B4B4B; font-size: 11px; font-weight: 600; }
+.recap-extra-modal-fields select, .recap-extra-modal-quantity input { box-sizing: border-box; width: 100%; min-height: 40px; padding: 0 11px; border: 1px solid #E3E3E3; border-radius: 7px; background: #FFF; color: #333; font: inherit; font-size: 12px; }
+.recap-extra-modal-fields select:disabled { background: #F5F5F5; color: #AAA; }
+.recap-extra-modal-quantity { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 10px; }
+.recap-extra-modal-quantity > span { min-width: 60px; color: #777; font-size: 11px; }
+.recap-extra-price-preview { display: flex; justify-content: space-between; gap: 12px; margin-top: 16px; padding: 12px; border: 1px solid #EAEAEA; border-radius: 8px; background: #FAFAFA; color: #666; font-size: 10px; }
+.recap-extra-price-preview strong { color: #303030; font-size: 11px; text-align: right; }
+@media (max-width: 520px) { .recap-add-model-material { margin-left: 0; } .recap-extra-price-preview { flex-direction: column; } .recap-extra-price-preview strong { text-align: left; } }

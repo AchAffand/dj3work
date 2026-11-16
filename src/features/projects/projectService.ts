@@ -42,6 +42,14 @@ export type ProjectSaveResult = {
   missingPriceCount: number;
 };
 
+function createStableId(): string {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (char) => {
+    const random = Math.floor(Math.random() * 16);
+    return (char === "x" ? random : (random & 0x3) | 0x8).toString(16);
+  });
+}
+
 function modelSnapshot(
   model: DoorModel,
   inputs: InputVariables,
@@ -114,7 +122,7 @@ export function createProjectService(
 
         const hasSavedSnapshot = Array.isArray(line.formulaSnapshot) && Array.isArray(line.resultSnapshot?.items);
         return {
-          id: line.id,
+          id: line.id ?? createStableId(),
           modelCode: line.modelCode,
           inputs: line.inputs,
           count: line.count,
@@ -154,7 +162,11 @@ export function createProjectService(
         project,
         recap,
         total: recap.reduce((sum, row) => sum + (row.subtotal ?? 0), 0)
-          + (draft.extraMaterials ?? []).reduce((sum, item) => sum + (item.unitPrice === null ? 0 : item.quantity * item.unitPrice), 0),
+          + (draft.extraMaterials ?? []).reduce((sum, item) => {
+            if (item.unitPrice === null) return sum;
+            const modelCount = item.modelLineId ? (lines.find((line) => line.id === item.modelLineId)?.count ?? 1) : 1;
+            return sum + item.quantity * modelCount * item.unitPrice;
+          }, 0),
         missingPriceCount: recap.filter((row) => row.unitPrice === null).length
           + (draft.extraMaterials ?? []).filter((item) => item.unitPrice === null).length,
       };
