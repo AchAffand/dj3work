@@ -35,6 +35,7 @@ export function ProjectPrintPage() {
   const [location, setLocation] = useState("");
   const [floor, setFloor] = useState("");
   const [reportDate, setReportDate] = useState("");
+  const [offerNumber, setOfferNumber] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -53,6 +54,9 @@ export function ProjectPrintPage() {
           setLocation(loaded.location ?? "");
           setFloor(loaded.floor ?? "");
           setReportDate((loaded.createdAt ?? new Date().toISOString()).slice(0, 10));
+          const createdAt = new Date(loaded.createdAt ?? new Date().toISOString());
+          const romanMonths = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
+          setOfferNumber(`${loaded.offerNumber ?? 1001}/DJ3/${romanMonths[createdAt.getMonth()]}/${createdAt.getFullYear()}`);
         } else setError("Proyek tidak ditemukan atau tidak dapat dibuka.");
       }
     }).catch((cause) => {
@@ -173,7 +177,7 @@ export function ProjectPrintPage() {
           <div><dt>CUSTOMER</dt><dd><input aria-label="Customer" value={customer} onChange={(event) => setCustomer(event.target.value)} /></dd></div>
           <div><dt>LOKASI</dt><dd><input aria-label="Lokasi" value={location} onChange={(event) => setLocation(event.target.value)} /></dd></div>
           <div><dt>LANTAI</dt><dd><input aria-label="Lantai" value={floor} onChange={(event) => setFloor(event.target.value)} /></dd></div>
-          <div><dt>NO. PENAWARAN</dt><dd>{project.offerNumber ?? 1001}/DJ3/{["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"][new Date((project.createdAt ?? new Date().toISOString()).slice(0, 10) + "T12:00:00").getMonth()]}/{new Date(project.createdAt ?? new Date().toISOString()).getFullYear()}</dd></div>
+          <div><dt>NO. PENAWARAN</dt><dd><input aria-label="Nomor penawaran" value={offerNumber} onChange={(event) => setOfferNumber(event.target.value)} /></dd></div>
           <div><dt>TANGGAL</dt><dd><input aria-label="Tanggal penawaran" type="date" value={reportDate} onChange={(event) => setReportDate(event.target.value)} /></dd></div>
         </dl>
 
