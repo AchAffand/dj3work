@@ -1004,3 +1004,47 @@ h1 { margin: 0; color: var(--ink); font-size: clamp(28px, 3vw, 37px); font-weigh
   text-overflow: ellipsis;
 }
 .recap-model-rule { display: none; }
+
+
+/* Multi-select choices for formula materials with variable glass and spandrel requirements. */
+.recap-component-options {
+  display: grid;
+  gap: 7px;
+  max-height: 190px;
+  overflow: auto;
+  padding: 9px 10px;
+  border: 1px solid var(--line, #dfe4ec);
+  border-radius: 10px;
+  background: var(--surface-soft, #f8fafc);
+}
+.recap-component-options-hint {
+  color: var(--muted, #687386);
+  font-size: 11px;
+  line-height: 1.4;
+}
+.recap-component-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: var(--ink, #253047);
+  font-size: 12px;
+  line-height: 1.45;
+  cursor: pointer;
+}
+.recap-component-option input {
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+  margin: 1px 0 0;
+  accent-color: var(--accent, #315fbd);
+}
+.recap-selected-component-prices {
+  display: grid;
+  gap: 4px;
+  min-width: 130px;
+}
+.recap-selected-component-prices small {
+  color: var(--muted, #687386);
+  font-size: 11px;
+  line-height: 1.4;
+}

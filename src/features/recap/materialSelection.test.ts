@@ -95,6 +95,8 @@ describe("relational material selection", () => {
 
   it("routes glass, accessory and door-leaf rows to their own families", () => {
     expect(materialFamily("Kaca", "M2")).toBe("glass");
+    expect(materialFamily("Kaca/Jendela", "M2")).toBe("glass");
+    expect(materialFamily("Kaca/ACP/Spandrel/Pintu", "M2")).toBe("aluminium");
     expect(materialFamily("Engsel Kupu", "pcs")).toBe("accessory");
     expect(materialFamily("Daun Pintu", "unit")).toBe("door-leaf");
   });
