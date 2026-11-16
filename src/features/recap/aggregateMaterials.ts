@@ -14,11 +14,13 @@ export type RecapInputMaterial = {
 };
 
 export type RecapLineInput = {
+  modelIndex?: number;
   materials: readonly RecapInputMaterial[];
   modelCount: number;
 };
 
 export type MaterialRecapRow = {
+  modelIndex: number;
   materialCode: number;
   name: string;
   unit: string;
@@ -40,14 +42,16 @@ export function aggregateMaterials(
 ): MaterialRecapRow[] {
   const totals = new Map<string, Omit<MaterialRecapRow, "unitPrice" | "subtotal"> & { configuredPrice: number | null | undefined }>();
 
-  for (const line of lines) {
+  for (const [linePosition, line] of lines.entries()) {
+    const modelIndex = line.modelIndex ?? linePosition + 1;
     for (const material of line.materials) {
       const priceKey = material.priceKey ?? `manual:${material.materialCode}`;
-      const identity = `${material.materialCode}\u0000${material.unit}\u0000${priceKey}`;
+      const identity = `${modelIndex}\u0000${material.materialCode}\u0000${material.unit}\u0000${priceKey}`;
       const row = totals.get(identity);
       const quantity = material.quantity * line.modelCount;
       if (row) row.quantity += quantity;
       else totals.set(identity, {
+        modelIndex,
         materialCode: material.materialCode,
         name: material.name,
         unit: material.unit,
@@ -70,13 +74,14 @@ export function aggregateMaterials(
   }
 
   return [...totals.values()]
-    .sort((left, right) => left.materialCode - right.materialCode || left.unit.localeCompare(right.unit, "id"))
+    .sort((left, right) => left.modelIndex - right.modelIndex || left.materialCode - right.materialCode || left.unit.localeCompare(right.unit, "id"))
     .map((row) => {
       const configuredPrice = row.configuredPrice;
       const unitPrice = typeof configuredPrice === "number" && Number.isFinite(configuredPrice)
         ? configuredPrice
         : null;
       return {
+        modelIndex: row.modelIndex,
         materialCode: row.materialCode, name: row.name, unit: row.unit, quantity: row.quantity, priceKey: row.priceKey,
         catalogId: row.catalogId, variantId: row.variantId, priceVersion: row.priceVersion,
         expressionSnapshot: row.expressionSnapshot, componentId: row.componentId, priceSourceLabel: row.priceSourceLabel,
