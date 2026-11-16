@@ -1233,3 +1233,13 @@ h1 { margin: 0; color: var(--ink); font-size: clamp(28px, 3vw, 37px); font-weigh
   .project-offer-footer { margin-top: 16px; }
   .project-offer-footer > div strong { font-size: 19px; }
 }
+
+.project-offer-number { margin: 13px 0 0; color: #292D38; font-size: 11px; text-align: right; font-variant-numeric: tabular-nums; }
+.project-offer-number strong { font-weight: 750; }
+.project-offer-meta dd input { width: 100%; min-width: 0; padding: 0; border: 0; outline: 0; border-radius: 0; background: transparent; color: #292D38; font: inherit; font-size: 11px; font-weight: 650; }
+.project-offer-meta dd input:focus { box-shadow: 0 1px 0 #D91F2B; }
+.project-offer-meta dd input[type="date"] { text-align: right; }
+@media print {
+  .project-offer-meta dd input { appearance: none; -webkit-appearance: none; }
+  .project-offer-meta dd input[type="date"]::-webkit-calendar-picker-indicator { display: none; }
+}
