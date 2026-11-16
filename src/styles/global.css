@@ -1152,3 +1152,20 @@ h1 { margin: 0; color: var(--ink); font-size: clamp(28px, 3vw, 37px); font-weigh
 .recap-extra-price-preview { display: flex; justify-content: space-between; gap: 12px; margin-top: 16px; padding: 12px; border: 1px solid #EAEAEA; border-radius: 8px; background: #FAFAFA; color: #666; font-size: 10px; }
 .recap-extra-price-preview strong { color: #303030; font-size: 11px; text-align: right; }
 @media (max-width: 520px) { .recap-add-model-material { margin-left: 0; } .recap-extra-price-preview { flex-direction: column; } .recap-extra-price-preview strong { text-align: left; } }
+
+
+/* Calculator workspace: compact model cards and a wider material recap. */
+@media (min-width: 1121px) {
+  .calculator-layout {
+    grid-template-columns: minmax(330px, .82fr) minmax(0, 1.18fr);
+    gap: 14px;
+  }
+}
+.model-line-list { gap: 8px; }
+.model-line-card { padding: 12px 12px 10px; }
+.model-line-heading { gap: 8px; padding-bottom: 10px; }
+.input-grid { gap: 9px; padding: 11px 0; }
+.line-results { padding-top: 10px; }
+.recap-card { padding: 18px 20px; }
+.recap-table { min-width: 100%; }
+.recap-selection-stack { min-width: 170px; }
