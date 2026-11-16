@@ -148,12 +148,8 @@ export function CalculatorPage() {
         const detail = selection.catalogId ? budgetDetails.get(selection.catalogId) : undefined;
         const componentOptions = relatedMaterialComponents(detail, family, material.name);
         const componentId = multiSelectable ? null : selection.componentId ?? (family !== "other" && componentOptions.length === 1 ? componentOptions[0].id : null);
-        const variantId = selection.variantId ?? (family !== "aluminium" && detail?.variants.length === 1 ? detail.variants[0].id : null);
-        const resolvedSelection = {
-          ...selection,
-          componentId,
-          variantId: savedFormulaOption?.variantId ?? variantId,
-        };
+        const variantId = selection.variantId ?? savedFormulaOption?.variantId ?? (family !== "aluminium" && detail?.variants.length === 1 ? detail.variants[0].id : null);
+        const resolvedSelection = { ...selection, componentId, variantId };
         const variant = detail?.variants.find((item) => item.id === resolvedSelection.variantId);
         const requiresComponentChoice = !multiSelectable && family !== "other" && componentOptions.length > 1 && !resolvedSelection.componentId;
         const mapped = multiSelectable || requiresComponentChoice
