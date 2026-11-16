@@ -1169,3 +1169,67 @@ h1 { margin: 0; color: var(--ink); font-size: clamp(28px, 3vw, 37px); font-weigh
 .recap-card { padding: 18px 20px; }
 .recap-table { min-width: 100%; }
 .recap-selection-stack { min-width: 170px; }
+
+/* Project quotation print layout */
+.project-report { padding: 34px 38px; border: 0; border-radius: 0; box-shadow: none; }
+.project-offer-header { display: flex; min-height: 112px; align-items: center; justify-content: space-between; gap: 24px; padding: 0 0 22px; border-bottom: 1px solid #E8E5DF; }
+.project-offer-brand { width: 132px; height: 132px; flex: 0 0 132px; display: flex; align-items: center; justify-content: flex-start; }
+.project-offer-brand img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.project-offer-title { display: flex; flex-direction: column; align-items: flex-end; margin: 0; color: #242733; font-size: 31px; font-weight: 760; letter-spacing: -.045em; line-height: 1.02; }
+.project-offer-meta { display: grid; grid-template-columns: 1.1fr 1fr 1fr .8fr; gap: 18px; margin: 0; padding: 17px 0 19px; border-bottom: 1px solid #E8E5DF; }
+.project-offer-meta > div { min-width: 0; display: grid; gap: 6px; }
+.project-offer-meta dt { color: #9A958B; font-size: 8px; font-weight: 700; letter-spacing: .16em; }
+.project-offer-meta dd { overflow-wrap: anywhere; margin: 0; color: #292D38; font-size: 11px; font-weight: 650; }
+.project-offer-meta > div:last-child { text-align: right; }
+.project-offer-sections { display: grid; gap: 14px; padding-top: 22px; }
+.project-offer-model { break-inside: avoid; padding: 17px 19px 13px; border: 1px solid #ECE9E3; border-radius: 13px; background: #FFF; }
+.project-offer-model-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.project-offer-model-heading h2 { display: flex; min-width: 0; align-items: baseline; gap: 9px; margin: 0; color: #272B36; font-size: 15px; font-weight: 750; }
+.project-offer-model-heading h2 > span { color: #D91F2B; font-size: 11px; }
+.project-offer-model-heading h2 small { color: #888; font-size: 10px; font-weight: 550; }
+.project-offer-model-heading > strong { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 10px; padding: 7px 12px; border-radius: 30px; background: #FBEDEE; color: #D51F2B; font-size: 11px; white-space: nowrap; }
+.project-offer-model-heading > strong span { font-size: 8px; font-weight: 700; letter-spacing: .1em; }
+.project-offer-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 10px; }
+.project-offer-table th, .project-offer-table td { padding: 5px 4px; border: 0; text-align: right; vertical-align: middle; }
+.project-offer-table th:first-child, .project-offer-table td:first-child { width: 43%; text-align: left; }
+.project-offer-table th:nth-child(2), .project-offer-table td:nth-child(2) { width: 12%; }
+.project-offer-table th:nth-child(3), .project-offer-table td:nth-child(3) { width: 17%; }
+.project-offer-table th:nth-child(4), .project-offer-table td:nth-child(4) { width: 10%; }
+.project-offer-table th:last-child, .project-offer-table td:last-child { width: 18%; }
+.project-offer-table thead th { padding-top: 3px; padding-bottom: 8px; border-bottom: 1px solid #EAE7E1; color: #9A958B; font-size: 8px; font-weight: 700; letter-spacing: .12em; white-space: nowrap; }
+.project-offer-table tbody td { color: #3F424A; }
+.project-offer-table tbody td:nth-child(2), .project-offer-table tbody td:nth-child(3), .project-offer-table tbody td:last-child { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.project-offer-table tbody td:nth-child(4) { color: #8D887E; }
+.project-offer-table tbody td:last-child { font-weight: 650; }
+.project-offer-footer { display: grid; justify-items: end; gap: 9px; margin-top: 22px; padding-top: 15px; border-top: 1px solid #E8E5DF; }
+.project-offer-footer > div { display: flex; align-items: center; gap: 22px; color: #242733; }
+.project-offer-footer > div span { font-size: 10px; font-weight: 750; letter-spacing: .12em; }
+.project-offer-footer > div strong { font-size: 22px; font-weight: 780; }
+.project-offer-footer p { max-width: 330px; margin: 0; color: #8B867D; font-size: 9px; text-align: right; }
+.project-offer-footer small { margin-top: 7px; color: #8B867D; font-size: 8px; letter-spacing: .1em; }
+@media (max-width: 650px) {
+  .project-report { padding: 18px 14px; }
+  .project-offer-header { min-height: 90px; }
+  .project-offer-brand { width: 96px; height: 96px; flex-basis: 96px; }
+  .project-offer-title { font-size: 25px; }
+  .project-offer-meta { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+  .project-offer-meta > div:last-child { text-align: left; }
+  .project-offer-model { padding: 12px 10px; overflow-x: auto; }
+  .project-offer-table { min-width: 480px; }
+}
+@page { size: A4; margin: 13mm; }
+@media print {
+  body { background: #FFF !important; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .project-report { padding: 0; }
+  .project-offer-header { min-height: 96px; }
+  .project-offer-brand { width: 112px; height: 112px; flex-basis: 112px; }
+  .project-offer-title { font-size: 28px; }
+  .project-offer-sections { gap: 10px; padding-top: 17px; }
+  .project-offer-model { padding: 12px 15px 10px; border-radius: 10px; }
+  .project-offer-model-heading { margin-bottom: 8px; }
+  .project-offer-model-heading h2 { font-size: 13px; }
+  .project-offer-model-heading > strong { padding: 5px 9px; font-size: 10px; }
+  .project-offer-table th, .project-offer-table td { padding: 4px 3px; font-size: 9px; }
+  .project-offer-footer { margin-top: 16px; }
+  .project-offer-footer > div strong { font-size: 19px; }
+}
