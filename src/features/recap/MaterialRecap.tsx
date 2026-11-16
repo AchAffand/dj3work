@@ -44,7 +44,7 @@ const familyLabels = {
 } as const;
 
 export function MaterialRecap({ rows, total, budgetCatalogs, budgetDetails, onSelectionChange, onPriceChange, extraMaterials, onExtraMaterialsChange }: MaterialRecapProps) {
-  const missingPrices = rows.filter((row) => !supportsMultipleBudgetComponents(row.name) && row.unitPrice === null).length
+  const missingPrices = rows.filter((row) => row.unitPrice === null).length
     + extraMaterials.filter((item) => item.unitPrice === null && item.componentId).length;
   const visibleExtraMaterials = extraMaterials.filter((item) =>
     !item.name.startsWith("__door_finish__:") && !item.name.startsWith("__formula_option__:"),
@@ -71,50 +71,13 @@ export function MaterialRecap({ rows, total, budgetCatalogs, budgetDetails, onSe
                 const detail = catalogId ? budgetDetails.get(catalogId) : undefined;
                 const selectedVariant = detail?.variants.find((variant) => variant.id === row.variantId);
                 const components = relatedMaterialComponents(detail, family, row.name);
-                const selectedFormulaOptions = extraMaterials.filter((item) => {
-                  const option = parseFormulaOptionMaterialKey(item.name);
-                  return option?.modelIndex === row.modelIndex && option.materialCode === row.materialCode;
-                });
-                const selectedFormulaOptionIds = new Set(selectedFormulaOptions.flatMap((item) => {
-                  const option = parseFormulaOptionMaterialKey(item.name);
-                  return option ? [option.componentId] : [];
-                }));
-                const selectedFormulaSubtotal = selectedFormulaOptions.reduce((sum, item) => sum + (item.unitPrice === null ? 0 : item.quantity * item.unitPrice), 0);
-                const selectedFormulaHasMissingPrice = selectedFormulaOptions.some((item) => item.unitPrice === null);
                 const selection = (patch: Partial<MaterialSelection>) => onSelectionChange(row.modelIndex, row.materialCode, {
                   catalogId: catalogId || null,
                   variantId: row.variantId,
                   componentId: row.componentId,
                   ...patch,
                 });
-                const addFormulaOption = (componentId: string) => {
-                  if (!detail || !catalogId || selectedFormulaOptionIds.has(componentId)) return;
-                  const component = detail.components.find((candidate) => candidate.id === componentId);
-                  if (!component) return;
-                  onExtraMaterialsChange([...extraMaterials, {
-                    id: createMaterialId(),
-                    name: formulaOptionMaterialKey(row.modelIndex, row.materialCode, component.id),
-                    unit: component.unit,
-                    quantity: row.quantity,
-                    catalogId: detail.catalog.id,
-                    variantId: detail.variants.length === 1 ? detail.variants[0].id : null,
-                    componentId: component.id,
-                    unitPrice: null,
-                  }]);
-                };
-                const updateFormulaOption = (itemId: string, patch: Partial<ProjectExtraMaterial>) => {
-                  onExtraMaterialsChange(extraMaterials.map((item) => item.id === itemId ? { ...item, ...patch } : item));
-                };
-                const removeFormulaOption = (itemId: string) => {
-                  onExtraMaterialsChange(extraMaterials.filter((item) => item.id !== itemId));
-                };
-                const changeFormulaCatalog = (nextCatalogId: string) => {
-                  onExtraMaterialsChange(extraMaterials.filter((item) => {
-                    const option = parseFormulaOptionMaterialKey(item.name);
-                    return !option || option.modelIndex !== row.modelIndex || option.materialCode !== row.materialCode;
-                  }));
-                  selection({ catalogId: nextCatalogId || null, componentId: null, variantId: null });
-                };
+
 
                 return (
                   <Fragment key={`${row.modelIndex}-${row.materialCode}-${row.unit}-${row.priceKey}`}>
@@ -125,43 +88,39 @@ export function MaterialRecap({ rows, total, budgetCatalogs, budgetDetails, onSe
                     <td>
                       {multiSelectable ? (
                         <div className="recap-selection-stack">
-                          <span className="recap-family-tag">{family === "aluminium" ? "ALUMINIUM" : "KACA"}</span>
-                          <div className="recap-formula-option-editor">
+                          <label className="recap-select-field">
+                            <span className="sr-only">Katalog material {row.name}</span>
+                            <select value={row.catalogId ?? ""} onChange={(event) => {
+                              const nextId = event.target.value || null;
+                              const nextDetail = nextId ? budgetDetails.get(nextId) : undefined;
+                              const defaultVariant = nextDetail?.variants.find((variant) => variant.key === "brown") ?? nextDetail?.variants[0];
+                              onSelectionChange(row.modelIndex, row.materialCode, { catalogId: nextId, variantId: defaultVariant?.id ?? null, componentId: null });
+                            }}>
+                              <option value="">Pilih katalog</option>
+                              {budgetCatalogs.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
+                            </select>
+                          </label>
+                          {detail && detail.components.length > 0 && (
                             <label className="recap-select-field">
-                              <span className="sr-only">Pilih katalog untuk {row.name}</span>
-                              <select value={catalogId} onChange={(event) => changeFormulaCatalog(event.target.value)}>
-                                <option value="">Pilih katalog</option>
-                                {budgetCatalogs.map((catalog) => <option key={catalog.id} value={catalog.id}>{catalog.label}</option>)}
+                              <span className="sr-only">Pilih item katalog untuk {row.name}</span>
+                              <select value={row.componentId ?? ""} onChange={(event) => selection({
+                                componentId: event.target.value || null,
+                                variantId: detail.variants.length === 1 ? detail.variants[0].id : row.variantId,
+                              })}>
+                                <option value="">Pilih item katalog</option>
+                                {detail.components.map((component) => <option key={component.id} value={component.id}>{componentLabel(component)}</option>)}
                               </select>
                             </label>
-                            {components.length > 0 && (
-                              <label className="recap-select-field">
-                                <span className="sr-only">Pilih item katalog untuk {row.name}</span>
-                                <select value="" onChange={(event) => addFormulaOption(event.target.value)} disabled={!components.length}>
-                                  <option value="">Pilih item katalog</option>
-                                  {components.filter((component) => !selectedFormulaOptionIds.has(component.id)).map((component) => <option key={component.id} value={component.id}>{componentLabel(component)}</option>)}
-                                </select>
-                              </label>
-                            )}
-                            {selectedFormulaOptions.map((item) => {
-                              const itemDetail = item.catalogId ? budgetDetails.get(item.catalogId) : undefined;
-                              const component = itemDetail?.components.find((candidate) => candidate.id === item.componentId);
-                              return (
-                                <div className="recap-formula-selected-item" key={item.id}>
-                                  <span>{component ? componentLabel(component) : "Item terpilih"}</span>
-                                  {itemDetail && itemDetail.variants.length > 1 ? (
-                                    <select aria-label={`Varian harga ${component?.label ?? "item"}`} value={item.variantId ?? ""} onChange={(event) => updateFormulaOption(item.id, { variantId: event.target.value || null, unitPrice: null })}>
-                                      <option value="">Pilih varian harga</option>
-                                      {itemDetail.variants.map((variant) => <option key={variant.id} value={variant.id}>{variant.label}</option>)}
-                                    </select>
-                                  ) : (
-                                    <small>{itemDetail?.variants[0]?.label ?? "Varian tidak tersedia"}</small>
-                                  )}
-                                  <button type="button" className="recap-formula-remove" aria-label={`Hapus ${component?.label ?? "item"}`} onClick={() => removeFormulaOption(item.id)}>×</button>
-                                </div>
-                              );
-                            })}
-                          </div>
+                          )}
+                          {detail && detail.variants.length > 1 && (
+                            <label className="recap-select-field">
+                              <span className="sr-only">Varian harga {row.name}</span>
+                              <select value={row.variantId ?? ""} onChange={(event) => selection({ variantId: event.target.value || null })}>
+                                <option value="">Pilih varian harga</option>
+                                {detail.variants.map((variant) => <option key={variant.id} value={variant.id}>{variant.label}</option>)}
+                              </select>
+                            </label>
+                          )}
                         </div>
                       ) : family === "aluminium" && detail ? (
                         <div className="recap-selection-stack">
@@ -280,31 +239,16 @@ export function MaterialRecap({ rows, total, budgetCatalogs, budgetDetails, onSe
                       )}
                     </td>
                     <td>
-                      {multiSelectable ? (
-                        <div className="recap-selected-component-prices">
-                          {selectedFormulaOptions.length ? selectedFormulaOptions.map((item) => {
-                            const component = detail?.components.find((candidate) => candidate.id === item.componentId);
-                            return <small key={item.id}>{component ? componentLabel(component) : "Item terpilih"} · {item.unitPrice === null ? "Harga belum diisi" : formatRupiah(item.unitPrice)}</small>;
-                          }) : <span className="unpriced-label">Pilih item</span>}
-                        </div>
-                      ) : (
-                        <label className="price-field">
-                          <span className="sr-only">Harga satuan {row.name} ({row.unit})</span>
-                          <span className="price-prefix">Rp</span>
-                          <input type="number" min="0" step="any" inputMode="decimal" placeholder="Isi harga" value={row.unitPrice ?? ""} onChange={(event) => {
-                            if (event.target.value === "") onPriceChange(row.priceKey, undefined);
-                            else onPriceChange(row.priceKey, Math.max(0, Number(event.target.value)));
-                          }} />
-                        </label>
-                      )}
+                      <label className="price-field">
+                        <span className="sr-only">Harga satuan {row.name} ({row.unit})</span>
+                        <span className="price-prefix">Rp</span>
+                        <input type="number" min="0" step="any" inputMode="decimal" placeholder="Isi harga" value={row.unitPrice ?? ""} onChange={(event) => {
+                          if (event.target.value === "") onPriceChange(row.priceKey, undefined);
+                          else onPriceChange(row.priceKey, Math.max(0, Number(event.target.value)));
+                        }} />
+                      </label>
                     </td>
-                    <td className="recap-subtotal">{multiSelectable
-                      ? selectedFormulaOptions.length === 0
-                        ? <span className="unpriced-label">Pilih item</span>
-                        : selectedFormulaHasMissingPrice
-                          ? <span className="unpriced-label">Harga belum lengkap</span>
-                          : formatRupiah(selectedFormulaSubtotal)
-                      : row.subtotal === null ? <span className="unpriced-label">Pilih spesifikasi</span> : formatRupiah(row.subtotal)}</td>
+                    <td className="recap-subtotal">{row.subtotal === null ? <span className="unpriced-label">Pilih spesifikasi</span> : formatRupiah(row.subtotal)}</td>
                   </tr>
 
                   </Fragment>
