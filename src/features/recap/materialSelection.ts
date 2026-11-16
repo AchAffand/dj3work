@@ -5,6 +5,24 @@ export type MaterialFamily = "aluminium" | "glass" | "accessory" | "door-leaf" |
 
 const normalize = (value: string) => value.normalize("NFKC").trim().replace(/\s+/g, " ").toLocaleLowerCase("id-ID");
 
+export type FormulaOptionMaterialReference = { modelIndex: number; materialCode: number; componentId: string };
+
+export function supportsMultipleBudgetComponents(materialName: string): boolean {
+  const normalized = normalize(materialName).replace(/\\s*\\/\\s*/g, "/");
+  return normalized === "kaca/jendela"
+    || /^kaca\\/acp\\/sp(?:andrel|ndrel|andrell)\\/pintu$/.test(normalized);
+}
+
+export function formulaOptionMaterialKey(modelIndex: number, materialCode: number, componentId: string): string {
+  return `__formula_option__:${modelIndex}:${materialCode}:${componentId}`;
+}
+
+export function parseFormulaOptionMaterialKey(value: string): FormulaOptionMaterialReference | null {
+  const match = /^__formula_option__:(\\d+):(\\d+):([0-9a-f-]+)$/i.exec(value);
+  if (!match) return null;
+  return { modelIndex: Number(match[1]), materialCode: Number(match[2]), componentId: match[3] };
+}
+
 export function materialFamily(name: string, unit: string): MaterialFamily {
   const normalizedName = normalize(name);
   if (/\b(kusen|aluminium|almunium|hollow|tapin|tatapan|louver|spandrell|canal|acp|jendela|rell)\b/.test(normalizedName) || (normalizedName === "pintu" && normalize(unit) === "m'")) return "aluminium";
