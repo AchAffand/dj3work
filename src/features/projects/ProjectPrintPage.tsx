@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AppPageState } from "../../app/AppPageState";
-import { formatDate, formatQuantity, formatRupiah } from "../../app/format";
+import { formatQuantity, formatRupiah } from "../../app/format";
 import { modelGroupLabel } from "../../domain/catalog/types";
 import type { Project, ProjectExtraMaterial } from "../../domain/projects/types";
 import { useAppServices } from "../../app/AppServices";
