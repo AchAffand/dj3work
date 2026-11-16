@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { BudgetCatalog, BudgetCatalogDetail } from "../../domain/budgets/types";
-import { aluminiumBrands, aluminiumFinishes, aluminiumVariantId, catalogForFamily, materialFamily, relatedMaterialComponents } from "./materialSelection";
+import { aluminiumBrands, aluminiumFinishes, aluminiumVariantId, catalogForFamily, formulaOptionMaterialKey, materialFamily, parseFormulaOptionMaterialKey, relatedMaterialComponents, supportsMultipleBudgetComponents } from "./materialSelection";
 
 const catalogs: BudgetCatalog[] = [
   { id: "aluminium", slug: "almunium", label: "ALUMUNIUM", position: 1, active: true },
@@ -48,6 +48,18 @@ const doorDetail: BudgetCatalogDetail = {
 };
 
 describe("relational material selection", () => {
+  it("allows one or several Master Harga components for variable glass and spandrel formula rows", () => {
+    expect(supportsMultipleBudgetComponents("Kaca/Jendela")).toBe(true);
+    expect(supportsMultipleBudgetComponents("Kaca/ACP/Spandrel/Pintu")).toBe(true);
+    expect(supportsMultipleBudgetComponents("kaca/acp/spndrel/pintu")).toBe(true);
+    expect(supportsMultipleBudgetComponents("Kaca Polos Tempered 8 mm")).toBe(false);
+    const key = formulaOptionMaterialKey(2, 30101, "c8a7bcd0-2f9b-4f1d-9b7a-6e0f8b7c1234");
+    expect(parseFormulaOptionMaterialKey(key)).toEqual({
+      modelIndex: 2, materialCode: 30101, componentId: "c8a7bcd0-2f9b-4f1d-9b7a-6e0f8b7c1234",
+    });
+    expect(parseFormulaOptionMaterialKey("manual-item")).toBeNull();
+  });
+
   it("classifies kusen as aluminium and routes it to the aluminium catalog", () => {
     expect(materialFamily("Kusen", "M'")).toBe("aluminium");
     expect(catalogForFamily("aluminium", catalogs)?.id).toBe("aluminium");
