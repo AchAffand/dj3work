@@ -222,9 +222,9 @@ export function CalculatorPage() {
     }));
   }, []);
 
-  function addModelLine() {
+  function addModelLine(modelCode?: number) {
     if (!models.length) return;
-    setDraft((current) => ({ ...current, lines: [...current.lines, makeLine(models[0].code)] }));
+    setDraft((current) => ({ ...current, lines: [...current.lines, makeLine(modelCode ?? models[0].code)] }));
   }
 
   async function saveCurrentProject() {
@@ -293,6 +293,7 @@ export function CalculatorPage() {
               results={results}
               onChange={updateLine}
               onRemove={removeLine}
+              onAddModel={addModelLine}
             />
           ) : (
             <div className="empty-models"><strong>Belum ada model</strong><p>Tambahkan setidaknya satu model pintu untuk mulai menghitung.</p></div>
