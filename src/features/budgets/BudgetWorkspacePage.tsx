@@ -40,20 +40,20 @@ export function BudgetWorkspacePage() {
     const label = groupDraft.label.trim();
     if (!label) { notify("error", "Nama kelompok wajib diisi."); return; }
     setSaving(true);
-    setMessage(null);
+    
     try {
       if (groupDraft.id) {
         await repository.renameBudgetCatalog(groupDraft.id, label);
-        setMessage("Nama kelompok berhasil diperbarui.");
+        notify("success", "Nama kelompok berhasil diperbarui.");
       } else {
         await repository.createBudgetCatalog(label);
-        setMessage("Kelompok baru berhasil ditambahkan.");
+        notify("success", "Kelompok baru berhasil ditambahkan.");
       }
       setGroupDraft(null);
       await load();
       await reloadBudgets?.();
     } catch (cause) {
-      setMessage(cause instanceof Error ? cause.message : "Kelompok gagal disimpan.");
+      notify("error", cause instanceof Error ? cause.message : "Kelompok gagal disimpan.");
     } finally {
       setSaving(false);
     }
@@ -62,15 +62,15 @@ export function BudgetWorkspacePage() {
   const deleteGroup = async () => {
     if (!repository || !deleteTarget) return;
     setSaving(true);
-    setMessage(null);
+    
     try {
       await repository.deleteBudgetCatalog(deleteTarget.id);
-      setMessage(`Kelompok "${deleteTarget.label}" dan seluruh itemnya berhasil dihapus permanen.`);
+      notify("success", `Kelompok "${deleteTarget.label}" dan seluruh itemnya berhasil dihapus permanen.`);
       setDeleteTarget(null);
       await load();
       await reloadBudgets?.();
     } catch (cause) {
-      setMessage(cause instanceof Error ? cause.message : "Kelompok gagal dihapus.");
+      notify("error", cause instanceof Error ? cause.message : "Kelompok gagal dihapus.");
     } finally {
       setSaving(false);
     }
@@ -87,7 +87,7 @@ export function BudgetWorkspacePage() {
           <h1>Master Harga</h1>
           <p className="page-description">Pilih lembar harga seperti berpindah sheet di Excel.</p>
         </div>
-        {isCatalogAdmin && <button className="primary-button" type="button" onClick={() => { setGroupDraft({ label: "" }); setMessage(null); }}>+ Tambah Kelompok</button>}
+        {isCatalogAdmin && <button className="primary-button" type="button" onClick={() => { setGroupDraft({ label: "" });  }}>+ Tambah Kelompok</button>}
       </div>
 
       {!isCatalogAdmin && <div className="notice-banner">Mode lihat saja. Pengelolaan kelompok memerlukan akses admin katalog.</div>}
@@ -101,7 +101,7 @@ export function BudgetWorkspacePage() {
               <span className="budget-workbook-open">Buka lembar <span aria-hidden="true">↗</span></span>
             </button>
             {isCatalogAdmin && <div className="budget-card-actions">
-              <button className="secondary-button" type="button" disabled={saving} onClick={() => { setGroupDraft({ id: catalog.id, label: catalog.label }); setMessage(null); }}>Edit Kelompok</button>
+              <button className="secondary-button" type="button" disabled={saving} onClick={() => { setGroupDraft({ id: catalog.id, label: catalog.label });  }}>Edit Kelompok</button>
               <button className="formula-danger-button" type="button" disabled={saving} onClick={() => setDeleteTarget(catalog)}>Hapus Kelompok</button>
             </div>}
           </article>
