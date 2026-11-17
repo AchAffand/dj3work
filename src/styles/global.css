@@ -1795,3 +1795,16 @@ h1 { margin: 0; color: var(--ink); font-size: clamp(28px, 3vw, 37px); font-weigh
 .topbar .breadcrumb > span:first-child {
   color: #171717;
 }
+
+
+/* Keep Workshop DJ3 footer plain inside the mobile navigation drawer. */
+@media (max-width: 820px) {
+  .mobile-nav-drawer .mobile-nav-footer {
+    border: 0 !important;
+    border-top: 0 !important;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    padding: 16px 8px 2px;
+  }
+}
