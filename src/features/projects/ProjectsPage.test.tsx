@@ -7,13 +7,13 @@ import { ProjectsPage } from "./ProjectsPage";
 import type { ProjectSummary } from "../../domain/projects/types";
 import { createSupabaseRepository } from "../../integrations/supabase/repository";
 
-function setup() {
-  const projects: ProjectSummary[] = [{
-    id: "project-1",
-    name: "Rumah Contoh",
-    updatedAt: "2026-10-01T00:00:00.000Z",
-    modelCount: 2,
-  }];
+function setup(projects: ProjectSummary[] = [{
+  id: "project-1",
+  name: "Rumah Contoh",
+  createdAt: "2026-10-01T00:00:00.000Z",
+  updatedAt: "2026-10-01T00:00:00.000Z",
+  modelCount: 2,
+}]) {
   const repository = { listProjects: vi.fn(async () => projects) } as unknown as ReturnType<typeof createSupabaseRepository>;
   function Location() {
     const location = useLocation();
@@ -39,6 +39,20 @@ function setup() {
 
 describe("ProjectsPage", () => {
   afterEach(() => cleanup());
+
+  it("shows the newest project first and the oldest project last", async () => {
+    setup([
+      { id: "old", name: "Proyek Lama", createdAt: "2026-01-01T00:00:00.000Z", updatedAt: "2026-11-16T00:00:00.000Z", modelCount: 1 },
+      { id: "new", name: "Proyek Baru", createdAt: "2026-11-01T00:00:00.000Z", updatedAt: "2026-11-02T00:00:00.000Z", modelCount: 1 },
+      { id: "middle", name: "Proyek Tengah", createdAt: "2026-06-01T00:00:00.000Z", updatedAt: "2026-06-01T00:00:00.000Z", modelCount: 1 },
+    ]);
+    const names = await screen.findAllByText(/Proyek (Lama|Baru|Tengah)/);
+    expect(names.map((item) => item.textContent)).toEqual([
+      "Proyek Baru",
+      "Proyek Tengah",
+      "Proyek Lama",
+    ]);
+  });
 
   it("opens the selected saved project for editing", async () => {
     const user = setup();
