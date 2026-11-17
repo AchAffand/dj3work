@@ -60,7 +60,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               ) : (
                 <NavLink aria-label={feature.label} title={feature.label} className={({ isActive }) => `nav-link${isActive ? " active" : ""}`} key={feature.id} to={feature.path} onClick={() => setMobileMenuOpen(false)}>
                   <span className="nav-icon" aria-hidden="true">{feature.icon}</span>
-                  <span>{feature.label}</span>
+                  <span className="nav-copy"><strong>{feature.label}</strong><small>{feature.description}</small></span>
                 </NavLink>
               ))}
             </nav>
