@@ -2,7 +2,7 @@ import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 
 export default defineConfig({
-  base: "/dj3work/",
+  base: process.env.VERCEL ? "/" : "/dj3work/",
   plugins: [react()],
   test: {
     environment: "jsdom",
