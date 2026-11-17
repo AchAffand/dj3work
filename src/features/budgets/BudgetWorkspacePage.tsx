@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppPageState } from "../../app/AppPageState";
 import { useAppServices } from "../../app/AppServices";
+import { useToast } from "../../app/ToastProvider";
 import type { BudgetCatalog } from "../../domain/budgets/types";
 
 type GroupDraft = { id?: string; label: string };
@@ -9,12 +10,12 @@ type DeleteTarget = BudgetCatalog | null;
 
 export function BudgetWorkspacePage() {
   const { repository, isCatalogAdmin, reloadBudgets } = useAppServices();
+  const { notify } = useToast();
   const navigate = useNavigate();
   const [catalogs, setCatalogs] = useState<BudgetCatalog[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
   const [groupDraft, setGroupDraft] = useState<GroupDraft | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget>(null);
 
@@ -37,7 +38,7 @@ export function BudgetWorkspacePage() {
   const saveGroup = async () => {
     if (!repository || !groupDraft) return;
     const label = groupDraft.label.trim();
-    if (!label) { setMessage("Nama kelompok wajib diisi."); return; }
+    if (!label) { notify("error", "Nama kelompok wajib diisi."); return; }
     setSaving(true);
     setMessage(null);
     try {
@@ -89,7 +90,6 @@ export function BudgetWorkspacePage() {
         {isCatalogAdmin && <button className="primary-button" type="button" onClick={() => { setGroupDraft({ label: "" }); setMessage(null); }}>+ Tambah Kelompok</button>}
       </div>
 
-      {message && <div className="notice-banner" role="status">{message}</div>}
       {!isCatalogAdmin && <div className="notice-banner">Mode lihat saja. Pengelolaan kelompok memerlukan akses admin katalog.</div>}
 
       <div className="budget-workbook-list">
