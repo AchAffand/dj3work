@@ -21,86 +21,77 @@ type ModelLineEditorProps = {
   results: ReadonlyMap<string, ProjectResultSnapshot>;
   onChange(lineId: string, updated: ProjectLineDraft): void;
   onRemove(lineId: string): void;
+  onAddModel(modelCode: number): void;
 };
 
-export function ModelLineEditor({ lines, models, results, onChange, onRemove }: ModelLineEditorProps) {
-  const [searchByLine, setSearchByLine] = useState<Record<string, string>>({});
-  const [openLineId, setOpenLineId] = useState<string | null>(null);
+export function ModelLineEditor({ lines, models, results, onChange, onRemove, onAddModel }: ModelLineEditorProps) {
+  const [modelSearch, setModelSearch] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const query = modelSearch.trim().toLocaleLowerCase("id-ID");
+  const matchingModels = models.filter((item) => !query || [String(item.code), item.name, modelGroupLabel(item.groupCode, item.groupName)].some((value) => value.toLocaleLowerCase("id-ID").includes(query))).slice(0, 40);
 
   return (
-    <div className="model-line-list">
+    <>
+      <div className="model-search-card calculator-model-search-card">
+        <div className="model-search-card-heading">
+          <span className="model-search-card-icon" aria-hidden="true">⌕</span>
+          <div><strong>Cari model kusen</strong><small>Cari berdasarkan kode, nama, atau kelompok, lalu pilih untuk menambahkan baris</small></div>
+        </div>
+        <div className="model-search-control">
+          <input
+            id="calculator-model-search"
+            type="search"
+            autoComplete="off"
+            role="combobox"
+            aria-label="Cari model kusen"
+            aria-expanded={searchOpen}
+            aria-controls="calculator-model-search-options"
+            placeholder="Cari model berdasarkan kode atau nama…"
+            value={modelSearch}
+            onFocus={() => setSearchOpen(true)}
+            onChange={(event) => { setModelSearch(event.target.value); setSearchOpen(true); }}
+            onKeyDown={(event) => {
+              if (event.key === "Escape") setSearchOpen(false);
+              if (event.key === "Enter" && matchingModels[0]) {
+                event.preventDefault();
+                onAddModel(matchingModels[0].code);
+                setModelSearch("");
+                setSearchOpen(false);
+              }
+            }}
+          />
+          {searchOpen && (
+            <div className="model-search-options" id="calculator-model-search-options" role="listbox" aria-label="Hasil pencarian model">
+              {matchingModels.map((item) => (
+                <button className="model-search-option" type="button" role="option" aria-selected={false} key={item.code}
+                  onClick={() => { onAddModel(item.code); setModelSearch(""); setSearchOpen(false); }}>
+                  <strong>{item.code} · {item.name}</strong><span>{modelGroupLabel(item.groupCode, item.groupName)}</span>
+                </button>
+              ))}
+              {!matchingModels.length && <p className="model-search-empty">Model tidak ditemukan.</p>}
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="model-line-list">
       {lines.map((line, index) => {
         const lineId = line.id ?? `${line.modelCode}-${index}`;
         const model = models.find((item) => item.code === line.modelCode);
         const result = results.get(lineId) ?? { items: [], errors: [] };
         return (
           <div className="model-line-group" key={lineId}>
-            <div className="model-search-card">
-              <div className="model-search-card-heading">
-                <span className="model-search-card-icon" aria-hidden="true">⌕</span>
-                <div><strong>Cari model kusen</strong><small>Ketik kode, nama, atau kelompok model</small></div>
-              </div>
-              <div className="model-search-control">
-                <input
-                  id={`model-search-${lineId}`}
-                  type="search"
-                  autoComplete="off"
-                  role="combobox"
-                  aria-label={`Cari model untuk baris ${index + 1}`}
-                  aria-expanded={openLineId === lineId}
-                  aria-controls={`model-options-${lineId}`}
-                  placeholder="Cari model berdasarkan kode atau nama…"
-                  value={openLineId === lineId ? (searchByLine[lineId] ?? "") : ""}
-                  onFocus={() => { setOpenLineId(lineId); setSearchByLine((current) => ({ ...current, [lineId]: "" })); }}
-                  onChange={(event) => { setOpenLineId(lineId); setSearchByLine((current) => ({ ...current, [lineId]: event.target.value })); }}
-                  onKeyDown={(event) => {
-                    if (event.key === "Escape") setOpenLineId(null);
-                    if (event.key === "Enter") {
-                      event.preventDefault();
-                      const query = (searchByLine[lineId] ?? "").trim().toLocaleLowerCase();
-                      const matches = models.filter((item) => !query || [String(item.code), item.name, modelGroupLabel(item.groupCode, item.groupName)].some((value) => value.toLocaleLowerCase().includes(query)));
-                      if (matches[0]) {
-                        onChange(lineId, { ...line, modelCode: matches[0].code, inputs: {}, formulaSnapshot: undefined, resultSnapshot: undefined });
-                        setOpenLineId(null);
-                      }
-                    }
-                  }}
-                />
-                {openLineId === lineId && (
-                  <div className="model-search-options" id={`model-options-${lineId}`} role="listbox" aria-label="Hasil pencarian model">
-                    {models.filter((item) => {
-                      const query = (searchByLine[lineId] ?? "").trim().toLocaleLowerCase();
-                      return !query || [String(item.code), item.name, modelGroupLabel(item.groupCode, item.groupName)].some((value) => value.toLocaleLowerCase().includes(query));
-                    }).slice(0, 40).map((item) => (
-                      <button className="model-search-option" type="button" role="option" aria-selected={item.code === line.modelCode} key={item.code}
-                        onClick={() => {
-                          onChange(lineId, { ...line, modelCode: item.code, inputs: {}, formulaSnapshot: undefined, resultSnapshot: undefined });
-                          setSearchByLine((current) => ({ ...current, [lineId]: "" }));
-                          setOpenLineId(null);
-                        }}>
-                        <strong>{item.code} · {item.name}</strong><span>{modelGroupLabel(item.groupCode, item.groupName)}</span>
-                      </button>
-                    ))}
-                    {models.filter((item) => {
-                      const query = (searchByLine[lineId] ?? "").trim().toLocaleLowerCase();
-                      return !query || [String(item.code), item.name, modelGroupLabel(item.groupCode, item.groupName)].some((value) => value.toLocaleLowerCase().includes(query));
-                    }).length === 0 && <p className="model-search-empty">Model tidak ditemukan.</p>}
-                  </div>
-                )}
-              </div>
-            </div>
             <article className="model-line-card">
               <div className="model-line-heading">
                 <span className="line-number">{String(index + 1).padStart(2, "0")}</span>
-              <label className="dimension-field line-model-native-select" htmlFor={`model-${lineId}`}>
-                <span>MODEL</span>
+              <div className="line-model-select">
+                <label htmlFor={`model-${lineId}`}>MODEL</label>
                 <select id={`model-${lineId}`} value={line.modelCode} onChange={(event) => {
                   const nextCode = Number(event.target.value);
                   onChange(lineId, { ...line, modelCode: nextCode, inputs: {}, formulaSnapshot: undefined, resultSnapshot: undefined });
                 }}>
                   {models.map((item) => <option key={item.code} value={item.code}>{item.code} · {item.name}</option>)}
                 </select>
-              </label>
+              </div>
               <label className="count-field" htmlFor={`count-${lineId}`}>
                 <span>JUMLAH UNIT</span>
                 <input
@@ -157,6 +148,7 @@ export function ModelLineEditor({ lines, models, results, onChange, onRemove }: 
           </div>
         );
       })}
-    </div>
+      </div>
+    </>
   );
 }
