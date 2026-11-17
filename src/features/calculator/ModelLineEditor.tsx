@@ -41,7 +41,6 @@ export function ModelLineEditor({ lines, models, results, onChange, onRemove }: 
                 <div><strong>Cari model kusen</strong><small>Ketik kode, nama, atau kelompok model</small></div>
               </div>
               <div className="model-search-control">
-                <div className="model-search-control">
                   <input
                     id={`model-${lineId}`}
                     type="search"
