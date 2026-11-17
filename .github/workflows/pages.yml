@@ -41,7 +41,13 @@ jobs:
             echo "::error::VITE_SUPABASE_PUBLISHABLE_KEY is empty or unavailable to the build job."
             exit 1
           fi
-          echo "Both Supabase build variables are present. Values are not displayed."
+          EXPECTED_PROJECT_REF="aubjgaiyimvwiijziptw"
+          ACTUAL_PROJECT_REF="$(printf '%s' "$VITE_SUPABASE_URL" | sed -E 's#https?://([^.]+)\\.supabase\\.co/?#\\1#')"
+          if [ "$ACTUAL_PROJECT_REF" != "$EXPECTED_PROJECT_REF" ]; then
+            echo "::error::DJ3 Work build is connected to the wrong Supabase project. Expected ref: $EXPECTED_PROJECT_REF; received ref: $ACTUAL_PROJECT_REF"
+            exit 1
+          fi
+          echo "Supabase URL and publishable key are present; project ref is DJ3 Work."
 
       - name: Build
         run: npm run build
