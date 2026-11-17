@@ -34,11 +34,13 @@ export function ModelLineEditor({ lines, models, results, onChange, onRemove }: 
         const model = models.find((item) => item.code === line.modelCode);
         const result = results.get(lineId) ?? { items: [], errors: [] };
         return (
-          <article className="model-line-card" key={lineId}>
-            <div className="model-line-heading">
-              <span className="line-number">{String(index + 1).padStart(2, "0")}</span>
-              <div className="line-model-select">
-                <label htmlFor={`model-${lineId}`}>MODEL</label>
+          <div className="model-line-group" key={lineId}>
+            <div className="model-search-card">
+              <div className="model-search-card-heading">
+                <span className="model-search-card-icon" aria-hidden="true">⌕</span>
+                <div><strong>Cari model kusen</strong><small>Ketik kode, nama, atau kelompok model</small></div>
+              </div>
+              <div className="model-search-control">
                 <div className="model-search-control">
                   <input
                     id={`model-${lineId}`}
@@ -100,8 +102,11 @@ export function ModelLineEditor({ lines, models, results, onChange, onRemove }: 
                       }).length === 0 && <p className="model-search-empty">Model tidak ditemukan.</p>}
                     </div>
                   )}
-                </div>
               </div>
+            </div>
+            <article className="model-line-card">
+              <div className="model-line-heading">
+                <span className="line-number">{String(index + 1).padStart(2, "0")}</span>
               <label className="count-field" htmlFor={`count-${lineId}`}>
                 <span>JUMLAH UNIT</span>
                 <input
@@ -154,7 +159,8 @@ export function ModelLineEditor({ lines, models, results, onChange, onRemove }: 
               </>
             )}
             {!model && <p className="empty-inline">Pilih model dari katalog.</p>}
-          </article>
+            </article>
+          </div>
         );
       })}
     </div>
