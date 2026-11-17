@@ -9,7 +9,7 @@ export function App() {
   return (
     <AuthProvider>
       <AppServicesProvider>
-        <BrowserRouter basename="/dj3work">
+        <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, "") || "/"}>
           <ProtectedRoute>
             <AppShell><AppRoutes /></AppShell>
           </ProtectedRoute>
