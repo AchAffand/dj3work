@@ -48,10 +48,17 @@ export function ProjectsPage() {
 
   const filteredProjects = useMemo(() => {
     const query = searchQuery.trim().toLocaleLowerCase("id-ID");
-    if (!query) return projects;
-    return projects.filter((project) =>
-      project.name.toLocaleLowerCase("id-ID").includes(query),
-    );
+    return [...projects]
+      .sort((a, b) => {
+        // Urutkan berdasarkan waktu proyek dibuat, bukan terakhir diedit.
+        // Proyek terbaru berada di atas; proyek terlama berada di bawah.
+        const dateA = Date.parse(a.createdAt ?? a.updatedAt) || 0;
+        const dateB = Date.parse(b.createdAt ?? b.updatedAt) || 0;
+        return dateB - dateA;
+      })
+      .filter((project) =>
+        !query || project.name.toLocaleLowerCase("id-ID").includes(query),
+      );
   }, [projects, searchQuery]);
 
   if (loading) return <AppPageState title="Memuat proyek" detail="Daftar proyek sedang disiapkan." />;
