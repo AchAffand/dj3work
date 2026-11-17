@@ -366,61 +366,58 @@ export function FormulaMasterPage() {
       <div className="formula-layout">
         <section className="formula-editor-card">
           {!models.length ? <div className="readonly-callout">Katalog masih kosong. Tambahkan model untuk mulai menyusun rumus.</div> : <>
+          <div className="model-search-card formula-model-search-card">
+            <div className="model-search-card-heading">
+              <span className="model-search-card-icon" aria-hidden="true">⌕</span>
+              <div><strong>Cari model</strong><small>Ketik kode, nama, atau kelompok model</small></div>
+            </div>
+            <div className="model-search-control">
+              <input
+                id="formula-model-search"
+                type="search"
+                autoComplete="off"
+                role="combobox"
+                aria-label="Cari model master rumus"
+                aria-expanded={modelSearchOpen}
+                aria-controls="formula-model-options"
+                placeholder="Cari model berdasarkan kode atau nama…"
+                value={modelSearchOpen ? modelSearch : ""}
+                onFocus={() => { setModelSearchOpen(true); setModelSearch(""); }}
+                onChange={(event) => { setModelSearchOpen(true); setModelSearch(event.target.value); }}
+                onKeyDown={(event) => {
+                  if (event.key === "Escape") setModelSearchOpen(false);
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    const query = modelSearch.trim().toLocaleLowerCase();
+                    const matches = models.filter((item) => !query || [String(item.code), item.name, modelGroupLabel(item.groupCode, item.groupName)].some((value) => value.toLocaleLowerCase().includes(query)));
+                    if (matches[0]) { setModelCode(matches[0].code); setModelSearch(""); setModelSearchOpen(false); }
+                  }
+                }}
+              />
+              {modelSearchOpen && (
+                <div className="model-search-options" id="formula-model-options" role="listbox" aria-label="Hasil pencarian model">
+                  {models.filter((item) => {
+                    const query = modelSearch.trim().toLocaleLowerCase();
+                    return !query || [String(item.code), item.name, modelGroupLabel(item.groupCode, item.groupName)].some((value) => value.toLocaleLowerCase().includes(query));
+                  }).slice(0, 40).map((item) => (
+                    <button className="model-search-option" type="button" role="option" aria-selected={item.code === selectedModel?.code} key={item.code}
+                      onClick={() => { setModelCode(item.code); setModelSearch(""); setModelSearchOpen(false); }}>
+                      <strong>{item.code} · {item.name}</strong><span>{modelGroupLabel(item.groupCode, item.groupName)}</span>
+                    </button>
+                  ))}
+                  {models.filter((item) => {
+                    const query = modelSearch.trim().toLocaleLowerCase();
+                    return !query || [String(item.code), item.name, modelGroupLabel(item.groupCode, item.groupName)].some((value) => value.toLocaleLowerCase().includes(query));
+                  }).length === 0 && <p className="model-search-empty">Model tidak ditemukan.</p>}
+                </div>
+              )}
+            </div>
+          </div>
           <div className="formula-select-grid">
-            <label className="form-field formula-model-search-field"><span>MODEL · CARI KODE / NAMA / KELOMPOK</span>
-              <div className="model-search-control">
-                <input
-                  id="formula-model"
-                  type="search"
-                  autoComplete="off"
-                  role="combobox"
-                  aria-label="Cari model master rumus"
-                  aria-expanded={modelSearchOpen}
-                  aria-controls="formula-model-options"
-                  placeholder="Cari model berdasarkan kode, nama, atau kelompok…"
-                  value={modelSearchOpen ? modelSearch : ""}
-                  onFocus={() => { setModelSearchOpen(true); setModelSearch(""); }}
-                  onChange={(event) => { setModelSearchOpen(true); setModelSearch(event.target.value); }}
-                  onKeyDown={(event) => {
-                    if (event.key === "Escape") setModelSearchOpen(false);
-                    if (event.key === "Enter") {
-                      event.preventDefault();
-                      const query = modelSearch.trim().toLocaleLowerCase();
-                      const matches = models.filter((item) => !query || [String(item.code), item.name, modelGroupLabel(item.groupCode, item.groupName)].some((value) => value.toLocaleLowerCase().includes(query)));
-                      if (matches[0]) {
-                        setModelCode(matches[0].code);
-                        setModelSearch("");
-                        setModelSearchOpen(false);
-                      }
-                    }
-                  }}
-                />
-                {selectedModel && <span className="model-search-selected">Terpilih: {selectedModel.code} · {selectedModel.name}</span>}
-                {modelSearchOpen && (
-                  <div className="model-search-options" id="formula-model-options" role="listbox" aria-label="Hasil pencarian model">
-                    {models.filter((item) => {
-                      const query = modelSearch.trim().toLocaleLowerCase();
-                      return !query || [String(item.code), item.name, modelGroupLabel(item.groupCode, item.groupName)].some((value) => value.toLocaleLowerCase().includes(query));
-                    }).slice(0, 40).map((item) => (
-                      <button
-                        className="model-search-option"
-                        type="button"
-                        role="option"
-                        aria-selected={item.code === selectedModel?.code}
-                        key={item.code}
-                        onClick={() => { setModelCode(item.code); setModelSearch(""); setModelSearchOpen(false); }}
-                      >
-                        <strong>{item.code} · {item.name}</strong>
-                        <span>{modelGroupLabel(item.groupCode, item.groupName)}</span>
-                      </button>
-                    ))}
-                    {models.filter((item) => {
-                      const query = modelSearch.trim().toLocaleLowerCase();
-                      return !query || [String(item.code), item.name, modelGroupLabel(item.groupCode, item.groupName)].some((value) => value.toLocaleLowerCase().includes(query));
-                    }).length === 0 && <p className="model-search-empty">Model tidak ditemukan.</p>}
-                  </div>
-                )}
-              </div>
+            <label className="form-field" htmlFor="formula-model"><span>MODEL</span>
+              <select id="formula-model" value={selectedModel?.code ?? ""} onChange={(event) => setModelCode(Number(event.target.value))}>
+                {models.map((item) => <option key={item.code} value={item.code}>{item.code} · {item.name}</option>)}
+              </select>
             </label>
             <label className="form-field" htmlFor="formula-material"><span>MATERIAL · KODE · SATUAN</span>
               <select id="formula-material" value={selectedMaterial?.code ?? ""} onChange={(event) => setMaterialCode(Number(event.target.value))}>
