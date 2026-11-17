@@ -36,6 +36,7 @@ export function ProjectPrintPage() {
   const [floor, setFloor] = useState("");
   const [reportDate, setReportDate] = useState("");
   const [offerNumber, setOfferNumber] = useState("");
+  const [modelTitleOverrides, setModelTitleOverrides] = useState<Record<string, string>>({});
 
   useEffect(() => {
     let active = true;
@@ -50,6 +51,7 @@ export function ProjectPrintPage() {
       if (active) {
         setProject(loaded);
         if (loaded) {
+          setModelTitleOverrides({});
           setCustomer(loaded.name);
           setLocation(loaded.location ?? "");
           setFloor(loaded.floor ?? "");
@@ -185,7 +187,7 @@ export function ProjectPrintPage() {
           {modelSections.map((section) => (
             <section className="project-offer-model" key={section.id}>
               <div className="project-offer-model-heading">
-                <h2><span>{section.number}</span>{section.title}{section.count > 1 && <small> × {section.count}</small>}</h2>
+                <h2><span>{section.number}</span><input className="project-offer-model-title-input" aria-label={`Nama model ${section.number}`} value={modelTitleOverrides[section.id] ?? section.title} onChange={(event) => setModelTitleOverrides((current) => ({ ...current, [section.id]: event.target.value }))} />{section.count > 1 && <small> × {section.count}</small>}</h2>
                 <strong><span>SUBTOTAL</span>{formatRupiah(section.subtotal)}</strong>
               </div>
               <table className="project-offer-table">
