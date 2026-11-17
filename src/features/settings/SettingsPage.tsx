@@ -129,9 +129,9 @@ export function SettingsPage() {
       </form>
 
       <div className="section-title-row settings-list-title"><div><p className="eyebrow">DAFTAR USER</p><h2>{users.length} akun</h2></div></div>
-      <div className="project-list">
+      <div className="project-list settings-user-list">
         {users.map((user) => (
-          <article className="project-list-row" key={user.id}>
+          <article className="project-list-row settings-user-row" key={user.id}>
             <span className="project-list-icon" aria-hidden="true">●</span>
             <span className="project-list-main">
               <strong>{user.username}{user.isAdmin ? " · admin" : ""}{user.isSelf ? " · Anda" : ""}</strong>
