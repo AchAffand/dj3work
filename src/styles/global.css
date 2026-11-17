@@ -1302,3 +1302,7 @@ h1 { margin: 0; color: var(--ink); font-size: clamp(28px, 3vw, 37px); font-weigh
 @media (max-width: 520px) {
   .model-search-options { max-height: 220px; }
 }
+
+/* Keep the selected model visible while leaving the search input ready to use. */
+.model-search-selected { display: block; margin: 5px 2px 0; overflow: hidden; color: #777; font-size: 9px; line-height: 1.4; text-overflow: ellipsis; white-space: nowrap; }
+.formula-model-search-field { min-width: 0; }
