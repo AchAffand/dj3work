@@ -6,6 +6,7 @@ import { modelGroupLabel } from "../../domain/catalog/types";
 import { AppPageState } from "../../app/AppPageState";
 import { formatRupiah } from "../../app/format";
 import { useAppServices } from "../../app/AppServices";
+import { useToast } from "../../app/ToastProvider";
 import { aggregateMaterials } from "../recap/aggregateMaterials";
 import { MaterialRecap } from "../recap/MaterialRecap";
 import { createProjectService, type MaterialSelection, type ProjectDraft, type ProjectLineDraft } from "../projects/projectService";
@@ -49,6 +50,7 @@ function priceMap(project: Project): Record<string, number | null | undefined> {
 
 export function CalculatorPage() {
   const { repository, catalog, loadingCatalog, catalogError, reloadCatalog, budgetCatalogs = [], budgetError, loadingBudgets, reloadBudgets } = useAppServices();
+  const { notify } = useToast();
   const budgetDetails = useAppServices().budgetDetails ?? new Map<string, BudgetCatalogDetail>();
   const [searchParams, setSearchParams] = useSearchParams();
   const projectId = searchParams.get("project");
@@ -244,9 +246,11 @@ export function CalculatorPage() {
         extraMaterials: saved.project.extraMaterials ?? [],
       });
       setSearchParams(new URLSearchParams({ project: saved.project.id }), { replace: true });
-      setMessage({ tone: "success", text: `Perhitungan tersimpan · ${formatRupiah(saved.total)} sementara.` });
+      setMessage(null);
+      notify("success", `Proyek “${saved.project.name}” berhasil disimpan. Total sementara ${formatRupiah(saved.total)}.`);
     } catch (error) {
-      setMessage({ tone: "error", text: error instanceof Error ? error.message : "Perhitungan gagal disimpan." });
+      setMessage(null);
+      notify("error", error instanceof Error ? error.message : "Perhitungan gagal disimpan.");
     } finally {
       setSaving(false);
     }
