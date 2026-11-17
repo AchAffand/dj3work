@@ -60,22 +60,33 @@ Deno.serve(async (request: Request) => {
   const action = payload.action;
 
   if (action === "list") {
-    const [{ data: usersData, error: usersError }, { data: admins, error: adminsError }] = await Promise.all([
+    const [
+      { data: usersData, error: usersError },
+      { data: admins, error: adminsError },
+      { data: profiles, error: profilesError },
+    ] = await Promise.all([
       admin.auth.admin.listUsers({ page: 1, perPage: 200 }),
       admin.from("catalog_admins").select("user_id"),
+      admin.from("profiles").select("id,display_name,email"),
     ]);
-    if (usersError || adminsError) return json({ error: "Daftar user tidak dapat dimuat." }, 500);
+    if (usersError || adminsError || profilesError) return json({ error: "Daftar user tidak dapat dimuat." }, 500);
     const adminIds = new Set((admins ?? []).map((row: { user_id: string }) => row.user_id));
+    const profilesById = new Map((profiles ?? []).map((profile: { id: string; display_name: string | null; email: string | null }) => [profile.id, profile]));
     const users = usersData.users
-      .map((user) => ({
-        id: user.id,
-        username: toUsername(user.email),
-        displayName: (user.user_metadata?.full_name as string | undefined) ?? "",
-        isAdmin: adminIds.has(user.id),
-        isSelf: user.id === caller.user.id,
-        createdAt: user.created_at,
-        lastSignInAt: user.last_sign_in_at ?? null,
-      }))
+      .map((user) => {
+        const profile = profilesById.get(user.id);
+        return {
+          id: user.id,
+          username: toUsername(user.email),
+          displayName: (user.user_metadata?.full_name as string | undefined)
+            || profile?.display_name
+            || "",
+          isAdmin: adminIds.has(user.id),
+          isSelf: user.id === caller.user.id,
+          createdAt: user.created_at,
+          lastSignInAt: user.last_sign_in_at ?? null,
+        };
+      })
       .sort((a, b) => a.username.localeCompare(b.username));
     return json({ users });
   }
