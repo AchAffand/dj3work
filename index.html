@@ -8,6 +8,7 @@
     <title>DJ3 · Kalkulator Pintu</title>
     <script>
       (() => {
+        if (!window.location.hostname.endsWith("github.io")) return;
         const params = new URLSearchParams(window.location.search);
         const path = params.get("p");
         if (!path) return;
