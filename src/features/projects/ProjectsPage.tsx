@@ -4,9 +4,11 @@ import type { ProjectSummary } from "../../domain/projects/types";
 import { AppPageState } from "../../app/AppPageState";
 import { formatDate } from "../../app/format";
 import { useAppServices } from "../../app/AppServices";
+import { useToast } from "../../app/ToastProvider";
 
 export function ProjectsPage() {
   const { repository } = useAppServices();
+  const { notify } = useToast();
   const navigate = useNavigate();
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,8 +39,11 @@ export function ProjectsPage() {
       await repository.deleteProject(project.id);
       setProjects((current) => current.filter((item) => item.id !== project.id));
       setPendingDelete(null);
+      notify("success", `Proyek “${project.name}” berhasil dihapus.`);
     } catch (cause) {
-      setActionError(cause instanceof Error ? cause.message : "Proyek gagal dihapus.");
+      const detail = cause instanceof Error ? cause.message : "Proyek gagal dihapus.";
+      setActionError(detail);
+      notify("error", detail);
     } finally {
       setDeletingProjectId(null);
     }
