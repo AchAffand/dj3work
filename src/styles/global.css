@@ -1318,3 +1318,10 @@ h1 { margin: 0; color: var(--ink); font-size: clamp(28px, 3vw, 37px); font-weigh
 .model-search-card-heading small { margin-top: 3px; color: #858585; font-size: 10px; }
 .model-search-card .model-search-control > input { height: 42px; border-radius: 8px; font-size: 12px; }
 .model-line-card { min-width: 0; }
+
+
+/* Preserve the native model selection below the separate search card. */
+.line-model-native-select { min-width: 150px; flex: 1 1 220px; }
+.line-model-native-select select { box-sizing: border-box; width: 100%; min-height: 37px; padding: 0 9px; border: 1px solid #E6E6E6; border-radius: 7px; background: #FFF; color: #3D3D3D; font: inherit; font-size: 11px; }
+.line-model-native-select select:focus { outline: 0; border-color: #919191; box-shadow: 0 0 0 3px #F3F3F3; }
+.formula-model-search-card { margin-bottom: 12px; }
