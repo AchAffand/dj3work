@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { modelGroupLabel, type DoorModel, type InputVariableName, type InputVariables } from "../../domain/catalog/types";
 import type { ProjectLineDraft } from "../projects/projectService";
 import type { ProjectResultSnapshot } from "../../domain/projects/types";
@@ -23,6 +24,9 @@ type ModelLineEditorProps = {
 };
 
 export function ModelLineEditor({ lines, models, results, onChange, onRemove }: ModelLineEditorProps) {
+  const [searchByLine, setSearchByLine] = useState<Record<string, string>>({});
+  const [openLineId, setOpenLineId] = useState<string | null>(null);
+
   return (
     <div className="model-line-list">
       {lines.map((line, index) => {
@@ -35,19 +39,67 @@ export function ModelLineEditor({ lines, models, results, onChange, onRemove }: 
               <span className="line-number">{String(index + 1).padStart(2, "0")}</span>
               <div className="line-model-select">
                 <label htmlFor={`model-${lineId}`}>MODEL</label>
-                <select
-                  id={`model-${lineId}`}
-                  value={line.modelCode || ""}
-                  onChange={(event) => {
-                    const modelCode = Number(event.target.value);
-                    onChange(lineId, { ...line, modelCode, inputs: {}, formulaSnapshot: undefined, resultSnapshot: undefined });
-                  }}
-                >
-                  <option value="" disabled>Pilih kode model</option>
-                  {models.map((item) => (
-                    <option key={item.code} value={item.code}>{item.code} · {modelGroupLabel(item.groupCode, item.groupName)}</option>
-                  ))}
-                </select>
+                <div className="model-search-control">
+                  <input
+                    id={`model-${lineId}`}
+                    type="search"
+                    autoComplete="off"
+                    role="combobox"
+                    aria-label={`Cari model untuk baris ${index + 1}`}
+                    aria-expanded={openLineId === lineId}
+                    aria-controls={`model-options-${lineId}`}
+                    placeholder="Cari kode, nama, atau kelompok model…"
+                    value={openLineId === lineId ? (searchByLine[lineId] ?? "") : model ? `${model.code} · ${model.name}` : ""}
+                    onFocus={() => {
+                      setOpenLineId(lineId);
+                      setSearchByLine((current) => ({ ...current, [lineId]: "" }));
+                    }}
+                    onChange={(event) => {
+                      setOpenLineId(lineId);
+                      setSearchByLine((current) => ({ ...current, [lineId]: event.target.value }));
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === "Escape") setOpenLineId(null);
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                        const query = (searchByLine[lineId] ?? "").trim().toLocaleLowerCase();
+                        const matches = models.filter((item) => !query || [String(item.code), item.name, modelGroupLabel(item.groupCode, item.groupName)].some((value) => value.toLocaleLowerCase().includes(query)));
+                        if (matches[0]) {
+                          onChange(lineId, { ...line, modelCode: matches[0].code, inputs: {}, formulaSnapshot: undefined, resultSnapshot: undefined });
+                          setOpenLineId(null);
+                        }
+                      }
+                    }}
+                  />
+                  {openLineId === lineId && (
+                    <div className="model-search-options" id={`model-options-${lineId}`} role="listbox" aria-label="Hasil pencarian model">
+                      {models.filter((item) => {
+                        const query = (searchByLine[lineId] ?? "").trim().toLocaleLowerCase();
+                        return !query || [String(item.code), item.name, modelGroupLabel(item.groupCode, item.groupName)].some((value) => value.toLocaleLowerCase().includes(query));
+                      }).slice(0, 40).map((item) => (
+                        <button
+                          className="model-search-option"
+                          type="button"
+                          role="option"
+                          aria-selected={item.code === line.modelCode}
+                          key={item.code}
+                          onClick={() => {
+                            onChange(lineId, { ...line, modelCode: item.code, inputs: {}, formulaSnapshot: undefined, resultSnapshot: undefined });
+                            setSearchByLine((current) => ({ ...current, [lineId]: "" }));
+                            setOpenLineId(null);
+                          }}
+                        >
+                          <strong>{item.code} · {item.name}</strong>
+                          <span>{modelGroupLabel(item.groupCode, item.groupName)}</span>
+                        </button>
+                      ))}
+                      {models.filter((item) => {
+                        const query = (searchByLine[lineId] ?? "").trim().toLocaleLowerCase();
+                        return !query || [String(item.code), item.name, modelGroupLabel(item.groupCode, item.groupName)].some((value) => value.toLocaleLowerCase().includes(query));
+                      }).length === 0 && <p className="model-search-empty">Model tidak ditemukan.</p>}
+                    </div>
+                  )}
+                </div>
               </div>
               <label className="count-field" htmlFor={`count-${lineId}`}>
                 <span>JUMLAH UNIT</span>
