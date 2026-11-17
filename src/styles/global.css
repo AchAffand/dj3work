@@ -1559,3 +1559,52 @@ h1 { margin: 0; color: var(--ink); font-size: clamp(28px, 3vw, 37px); font-weigh
 @media (max-width: 520px) {
   .auth-brand .brand-logo { width: min(260px, 100%); }
 }
+
+
+/* Match DJ3 desktop navigation: descriptions are exclusive to the mobile drawer. */
+@media (min-width: 821px) {
+  .sidebar .nav-link { height: 45px; min-height: 45px; }
+  .sidebar .nav-copy { display: inline; }
+  .sidebar .nav-copy strong { display: inline; font: inherit; }
+  .sidebar .nav-copy small { display: none; }
+  .sidebar .nav-group > .nav-link { align-items: center; }
+}
+
+/* Match the original DJ3 mobile hamburger control: white surface, dark strokes. */
+@media (max-width: 820px) {
+  .mobile-menu-toggle {
+    display: inline-flex;
+    width: 38px;
+    height: 38px;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 5px;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #FFF;
+    color: #171717;
+    box-shadow: none;
+  }
+  .mobile-menu-toggle span { display: block; width: 16px; height: 2px; border-radius: 2px; background: #171717; }
+  .mobile-menu-toggle:hover { background: #F7F7F7; }
+  .mobile-nav-drawer .nav-link {
+    display: flex;
+    min-height: 45px;
+    height: auto;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 11px;
+    color: #242424;
+  }
+  .mobile-nav-drawer .nav-link.active {
+    background: #171717;
+    color: #FFF;
+  }
+  .mobile-nav-drawer .nav-link.active .nav-icon { color: #FFF; }
+  .mobile-nav-drawer .nav-copy { display: grid; min-width: 0; gap: 4px; }
+  .mobile-nav-drawer .nav-copy strong { color: inherit; font-size: 12px; font-weight: 680; }
+  .mobile-nav-drawer .nav-copy small { color: #858585; font-size: 10px; line-height: 1.4; }
+  .mobile-nav-drawer .nav-link.active .nav-copy small { color: #D0D0D0; }
+}
