@@ -21,7 +21,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           {visibleFeatures.map((feature) => feature.id === "budget-master" ? (
             <div className="nav-group" key={feature.id}>
               <NavLink aria-label={feature.label} title={feature.label} className={({ isActive }) => `nav-link${isActive ? " active" : ""}`} to={feature.path}>
-                <span className="nav-icon" aria-hidden="true">{feature.icon}</span><span className="nav-copy"><strong>{feature.label}</strong><small>{feature.description}</small></span>
+                <span className="nav-icon" aria-hidden="true">{feature.icon}</span><span>{feature.label}</span>
               </NavLink>
               {budgetCatalogs.map((catalog) => <NavLink className={({ isActive }) => `nav-sub-link${isActive ? " active" : ""}`} key={catalog.id} to={`/master-harga/${catalog.slug}?mode=prices`}>{catalog.label}</NavLink>)}
             </div>
@@ -53,7 +53,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               {visibleFeatures.map((feature) => feature.id === "budget-master" ? (
                 <div className="nav-group" key={feature.id}>
                   <NavLink aria-label={feature.label} title={feature.label} className={({ isActive }) => `nav-link${isActive ? " active" : ""}`} to={feature.path} onClick={() => setMobileMenuOpen(false)}>
-                    <span className="nav-icon" aria-hidden="true">{feature.icon}</span><span>{feature.label}</span>
+                    <span className="nav-icon" aria-hidden="true">{feature.icon}</span><span className="nav-copy"><strong>{feature.label}</strong><small>{feature.description}</small></span>
                   </NavLink>
                   {budgetCatalogs.map((catalog) => <NavLink className={({ isActive }) => `nav-sub-link${isActive ? " active" : ""}`} key={catalog.id} to={`/master-harga/${catalog.slug}?mode=prices`} onClick={() => setMobileMenuOpen(false)}>{catalog.label}</NavLink>)}
                 </div>
