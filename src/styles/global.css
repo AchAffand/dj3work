@@ -1309,7 +1309,6 @@ h1 { margin: 0; color: var(--ink); font-size: clamp(28px, 3vw, 37px); font-weigh
 
 
 /* Dedicated calculator model search card, visually aligned with the Projects search. */
-.model-line-group { display: grid; gap: 8px; min-width: 0; }
 .model-search-card { display: grid; gap: 10px; padding: 13px 14px; border: 1px solid #E4E4E4; border-radius: 9px; background: #FFF; }
 .model-search-card-heading { display: flex; align-items: center; gap: 9px; }
 .model-search-card-icon { color: #777; font-size: 22px; line-height: 1; }
@@ -1321,7 +1320,6 @@ h1 { margin: 0; color: var(--ink); font-size: clamp(28px, 3vw, 37px); font-weigh
 
 
 /* Preserve the native model selection below the separate search card. */
-.line-model-native-select { min-width: 150px; flex: 1 1 220px; }
-.line-model-native-select select { box-sizing: border-box; width: 100%; min-height: 37px; padding: 0 9px; border: 1px solid #E6E6E6; border-radius: 7px; background: #FFF; color: #3D3D3D; font: inherit; font-size: 11px; }
-.line-model-native-select select:focus { outline: 0; border-color: #919191; box-shadow: 0 0 0 3px #F3F3F3; }
 .formula-model-search-card { margin-bottom: 12px; }
+
+.calculator-model-search-card { margin-bottom: 12px; }
