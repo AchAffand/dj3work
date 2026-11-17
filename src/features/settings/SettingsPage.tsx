@@ -71,7 +71,6 @@ export function SettingsPage() {
   async function confirmDelete() {
     if (!userAdmin || !pendingDelete) return;
     setDeleting(true);
-    setMessage(null);
     try {
       await userAdmin.deleteUser(pendingDelete.id);
       notify("success", `User ${pendingDelete.username} berhasil dihapus.`);
