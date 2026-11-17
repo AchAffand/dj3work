@@ -10,6 +10,7 @@ export type FeatureDefinition = {
   label: string;
   path: string;
   icon: string;
+  description: string;
   component: ComponentType;
   /** Akses halaman tetap diperiksa di dalam komponen tujuan. */
   adminOnly?: boolean;
@@ -21,6 +22,7 @@ export const featureRegistry: readonly FeatureDefinition[] = [
     label: "Kalkulator Kusen",
     path: "/calculator",
     icon: "⌗",
+    description: "Hitung kebutuhan kusen dan material.",
     component: CalculatorPage,
   },
   {
@@ -28,6 +30,7 @@ export const featureRegistry: readonly FeatureDefinition[] = [
     label: "Proyek",
     path: "/projects",
     icon: "▤",
+    description: "Kelola proyek dan penawaran tersimpan.",
     component: ProjectsPage,
   },
   {
@@ -35,6 +38,7 @@ export const featureRegistry: readonly FeatureDefinition[] = [
     label: "Master Rumus",
     path: "/formulas",
     icon: "ƒx",
+    description: "Atur formula perhitungan material.",
     component: FormulaMasterPage,
   },
   {
@@ -42,6 +46,7 @@ export const featureRegistry: readonly FeatureDefinition[] = [
     label: "Master Harga",
     path: "/master-harga",
     icon: "▦",
+    description: "Kelola daftar harga dan katalog.",
     component: BudgetWorkspacePage,
   },
   {
@@ -49,6 +54,7 @@ export const featureRegistry: readonly FeatureDefinition[] = [
     label: "Pengaturan",
     path: "/pengaturan",
     icon: "⚙",
+    description: "Atur akun dan akses ruang kerja.",
     component: SettingsPage,
     adminOnly: true,
   },
