@@ -1808,3 +1808,28 @@ h1 { margin: 0; color: var(--ink); font-size: clamp(28px, 3vw, 37px); font-weigh
     padding: 16px 8px 2px;
   }
 }
+
+
+/* Editable model heading on quotation preview; input text prints as normal title. */
+.project-offer-model-title-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: inherit;
+}
+.project-offer-model-title-input:focus {
+  box-shadow: 0 1px 0 #D91F2B;
+}
+@media print {
+  .project-offer-model-title-input {
+    appearance: none;
+    -webkit-appearance: none;
+    box-shadow: none !important;
+  }
+}
