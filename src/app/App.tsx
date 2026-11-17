@@ -4,6 +4,7 @@ import { ProtectedRoute } from "../auth/ProtectedRoute";
 import { AppServicesProvider } from "./AppServices";
 import { AppShell } from "./AppShell";
 import { AppRoutes } from "./routes";
+import { ToastProvider } from "./ToastProvider";
 
 export function App() {
   return (
@@ -11,7 +12,7 @@ export function App() {
       <AppServicesProvider>
         <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, "") || "/"}>
           <ProtectedRoute>
-            <AppShell><AppRoutes /></AppShell>
+            <ToastProvider><AppShell><AppRoutes /></AppShell></ToastProvider>
           </ProtectedRoute>
         </BrowserRouter>
       </AppServicesProvider>
