@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { AppPageState } from "../../app/AppPageState";
 import { useAppServices } from "../../app/AppServices";
+import { useToast } from "../../app/ToastProvider";
 import { formatDate } from "../../app/format";
 import { isValidUsername, normalizeUsername } from "../../auth/username";
 import type { ManagedUser, UserRole } from "../../integrations/supabase/userAdmin";
@@ -14,12 +15,12 @@ const emptyForm: { username: string; displayName: string; password: string; role
 
 export function SettingsPage() {
   const { userAdmin, isCatalogAdmin, loadingCatalog } = useAppServices();
+  const { notify } = useToast();
   const [users, setUsers] = useState<ManagedUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
   const [pendingDelete, setPendingDelete] = useState<ManagedUser | null>(null);
   const [deleting, setDeleting] = useState(false);
 
@@ -54,15 +55,14 @@ export function SettingsPage() {
     event.preventDefault();
     if (!userAdmin || !usernameOk || !passwordOk) return;
     setSaving(true);
-    setMessage(null);
     try {
       const username = normalizeUsername(form.username);
       await userAdmin.createUser({ username, password: form.password, displayName: form.displayName.trim(), role: form.role });
       setForm(emptyForm);
-      setMessage({ tone: "ok", text: `${form.role === "admin" ? "Admin" : "User"} ${username} berhasil ditambahkan.` });
+      notify("success", `${form.role === "admin" ? "Admin" : "User"} ${username} berhasil ditambahkan.`);
       setUsers(await userAdmin.listUsers());
     } catch (cause) {
-      setMessage({ tone: "error", text: cause instanceof Error ? cause.message : "User tidak dapat ditambahkan." });
+      notify("error", cause instanceof Error ? cause.message : "User tidak dapat ditambahkan.");
     } finally {
       setSaving(false);
     }
@@ -74,11 +74,11 @@ export function SettingsPage() {
     setMessage(null);
     try {
       await userAdmin.deleteUser(pendingDelete.id);
-      setMessage({ tone: "ok", text: `User ${pendingDelete.username} dihapus.` });
+      notify("success", `User ${pendingDelete.username} berhasil dihapus.`);
       setPendingDelete(null);
       setUsers(await userAdmin.listUsers());
     } catch (cause) {
-      setMessage({ tone: "error", text: cause instanceof Error ? cause.message : "User tidak dapat dihapus." });
+      notify("error", cause instanceof Error ? cause.message : "User tidak dapat dihapus.");
       setPendingDelete(null);
     } finally {
       setDeleting(false);
@@ -95,7 +95,6 @@ export function SettingsPage() {
         </div>
       </div>
 
-      {message && <div className={`notice-banner${message.tone === "error" ? " error" : ""}`} role={message.tone === "error" ? "alert" : "status"}>{message.text}</div>}
 
       <form className="settings-card settings-form" onSubmit={(event) => void handleCreate(event)}>
         <div className="section-title-row"><div><p className="eyebrow">TAMBAH USER</p><h2>User baru</h2></div></div>
