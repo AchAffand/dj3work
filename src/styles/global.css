@@ -1243,3 +1243,62 @@ h1 { margin: 0; color: var(--ink); font-size: clamp(28px, 3vw, 37px); font-weigh
   .project-offer-meta dd input { appearance: none; -webkit-appearance: none; }
   .project-offer-meta dd input[type="date"]::-webkit-calendar-picker-indicator { display: none; }
 }
+
+
+/* Searchable model picker in the calculator. */
+.line-model-select { min-width: 0; }
+.model-search-control { position: relative; min-width: 0; }
+.model-search-control > input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 37px;
+  min-width: 0;
+  padding: 0 30px 0 10px;
+  border: 1px solid #E6E6E6;
+  border-radius: 7px;
+  outline: 0;
+  background: #FFF;
+  color: #3D3D3D;
+  font: inherit;
+  font-size: 11px;
+}
+.model-search-control > input:focus {
+  border-color: #919191;
+  box-shadow: 0 0 0 3px #F3F3F3;
+}
+.model-search-control > input::-webkit-search-cancel-button { cursor: pointer; }
+.model-search-options {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 5px);
+  right: 0;
+  left: 0;
+  display: grid;
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 5px;
+  border: 1px solid #E5E5E5;
+  border-radius: 9px;
+  background: #FFF;
+  box-shadow: 0 12px 30px rgb(0 0 0 / 12%);
+}
+.model-search-option {
+  display: grid;
+  gap: 3px;
+  width: 100%;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: #FFF;
+  color: #333;
+  cursor: pointer;
+  text-align: left;
+}
+.model-search-option:hover,
+.model-search-option[aria-selected="true"] { background: #F2F4F3; }
+.model-search-option strong { font-size: 11px; font-weight: 650; }
+.model-search-option span { color: #858585; font-size: 9px; }
+.model-search-empty { margin: 0; padding: 13px 10px; color: #858585; font-size: 11px; }
+@media (max-width: 520px) {
+  .model-search-options { max-height: 220px; }
+}
