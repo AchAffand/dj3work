@@ -48,8 +48,8 @@ export function ModelLineEditor({ lines, models, results, onChange, onRemove }: 
                     aria-label={`Cari model untuk baris ${index + 1}`}
                     aria-expanded={openLineId === lineId}
                     aria-controls={`model-options-${lineId}`}
-                    placeholder="Cari kode, nama, atau kelompok model…"
-                    value={openLineId === lineId ? (searchByLine[lineId] ?? "") : model ? `${model.code} · ${model.name}` : ""}
+                    placeholder="Cari model berdasarkan kode atau nama…"
+                    value={openLineId === lineId ? (searchByLine[lineId] ?? "") : ""}
                     onFocus={() => {
                       setOpenLineId(lineId);
                       setSearchByLine((current) => ({ ...current, [lineId]: "" }));
@@ -71,6 +71,7 @@ export function ModelLineEditor({ lines, models, results, onChange, onRemove }: 
                       }
                     }}
                   />
+                  {model && <span className="model-search-selected">Terpilih: {model.code} · {model.name}</span>}
                   {openLineId === lineId && (
                     <div className="model-search-options" id={`model-options-${lineId}`} role="listbox" aria-label="Hasil pencarian model">
                       {models.filter((item) => {
