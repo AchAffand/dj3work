@@ -102,9 +102,9 @@ export function ProjectsPage() {
             <div className="project-list">
               {filteredProjects.map((project, index) => (
                 <article className="project-list-row" key={project.id}>
-                  <span className="project-list-icon" aria-label={`Urutan ${index + 1}`}>{index + 1}</span>
+                  <span className="project-list-icon" aria-label={`Nomor proyek ${filteredProjects.length - index}`}>{filteredProjects.length - index}</span>
                   <span className="project-list-main"><strong>{project.name}</strong><small>{project.modelCount} model kusen · oleh {project.createdBy ?? "Pengguna"}</small></span>
-                  <span className="project-list-date">Diperbarui {formatDate(project.updatedAt)}</span>
+                  <span className="project-list-date">Dibuat {formatDate(project.createdAt ?? project.updatedAt)}</span>
                   <div className="project-list-actions">
                     <button className="secondary-button" type="button" aria-label={`Edit ${project.name}`} onClick={() => navigate(`/calculator?project=${encodeURIComponent(project.id)}`)}>Edit</button>
                     <button className="secondary-button" type="button" aria-label={`Cetak ${project.name}`} onClick={() => navigate(`/projects/${encodeURIComponent(project.id)}/print`)}>Cetak</button>
