@@ -1847,3 +1847,11 @@ h1 { margin: 0; color: var(--ink); font-size: clamp(28px, 3vw, 37px); font-weigh
 .recap-legacy-extra-section .recap-table { min-width: 520px; }
 .recap-legacy-extra-section .price-field { min-width: 120px; }
 @media (max-width: 720px) { .recap-heading-actions { width: 100%; justify-content: space-between; } .recap-heading-actions .primary-button { flex: 1; } }
+
+
+/* Success feedback after adding a project material. */
+.recap-success-toast { position: fixed; top: 22px; right: 22px; z-index: 1200; display: flex; align-items: center; gap: 11px; width: min(420px, calc(100vw - 32px)); box-sizing: border-box; padding: 13px 14px; border: 1px solid #B7E2C5; border-radius: 10px; background: #F0FBF3; color: #176B35; box-shadow: 0 8px 28px rgba(0,0,0,.14); font-size: 13px; line-height: 1.45; animation: recap-toast-in .18s ease-out; }
+.recap-success-toast-icon { display: grid; flex: 0 0 22px; width: 22px; height: 22px; place-items: center; border-radius: 50%; background: #D5F2DE; color: #176B35; font-weight: 800; }
+.recap-success-toast button { flex: 0 0 auto; margin-left: auto; border: 0; background: transparent; color: inherit; font-size: 20px; line-height: 1; cursor: pointer; }
+@keyframes recap-toast-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 520px) { .recap-success-toast { top: 12px; right: 12px; width: calc(100vw - 24px); } }
