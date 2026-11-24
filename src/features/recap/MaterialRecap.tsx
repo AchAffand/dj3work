@@ -405,7 +405,7 @@ export function MaterialRecap({ rows, modelLines, total, budgetCatalogs, budgetD
             <div className="recap-extra-modal-fields">
               <label><span>1. Nama Item</span><input autoFocus type="text" maxLength={120} placeholder="Contoh: Baut, sealant, ongkos pasang" value={manualName} onChange={(event) => setManualName(event.target.value)} /></label>
               <label><span>2. Qty</span><input type="number" min="0.0001" step="any" placeholder="Masukkan qty per satu unit model" value={manualQuantity} onChange={(event) => setManualQuantity(event.target.value)} /></label>
-              <label><span>3. Harga Satuan</span><div className="recap-extra-modal-quantity"><span>Rp</span><input type="number" min="0" step="any" placeholder="Masukkan harga satuan" value={manualUnitPrice} onChange={(event) => setManualUnitPrice(event.target.value)} /></div></label>
+              <label><span>3. Harga Satuan</span><div className="recap-extra-modal-quantity recap-extra-modal-price"><span>Rp</span><input type="number" min="0" step="any" placeholder="Masukkan harga satuan" value={manualUnitPrice} onChange={(event) => setManualUnitPrice(event.target.value)} /></div></label>
             </div>
             <div className="formula-modal-actions formula-confirm-actions">
               <button className="secondary-button" type="button" onClick={() => setManualModalOpen(false)}>Batal</button>
