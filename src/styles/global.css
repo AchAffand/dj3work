@@ -1359,11 +1359,11 @@ h1 { margin: 0; color: var(--ink); font-size: clamp(28px, 3vw, 37px); font-weigh
 
 /* Global notification surface: restrained, polished, and consistent across modules. */
 .formula-toast {
-  width: min(420px, calc(100vw - 32px));
-  gap: 13px;
-  padding: 16px 15px;
+  width: min(460px, calc(100vw - 32px));
+  gap: 15px;
+  padding: 19px 18px;
   border: 1px solid #D9E3F5;
-  border-radius: 16px;
+  border-radius: 17px;
   background: rgb(255 255 255 / 96%);
   box-shadow: 0 18px 55px rgb(20 35 65 / 18%), 0 2px 8px rgb(20 35 65 / 6%);
   backdrop-filter: blur(18px);
@@ -1372,18 +1372,18 @@ h1 { margin: 0; color: var(--ink); font-size: clamp(28px, 3vw, 37px); font-weigh
 .formula-toast.error { border-left: 3px solid #C94B55; }
 .formula-toast.info { border-left: 3px solid #2475E8; }
 .formula-toast-icon {
-  width: 27px;
-  height: 27px;
+  width: 32px;
+  height: 32px;
   border-color: #D6E4FC;
   background: #EDF4FF;
   color: #246BE0;
-  font-size: 13px;
+  font-size: 15px;
 }
 .formula-toast.error .formula-toast-icon { border-color: #F3D8DA; background: #FFF1F2; color: #B93843; }
-.formula-toast-copy { gap: 4px; padding-top: 1px; }
-.formula-toast-copy strong { color: #202A3A; font-size: 12px; font-weight: 720; }
-.formula-toast-copy span { color: #596579; font-size: 11px; line-height: 1.55; }
-.formula-toast-close { width: 25px; height: 25px; font-size: 20px; }
+.formula-toast-copy { gap: 5px; padding-top: 1px; }
+.formula-toast-copy strong { color: #202A3A; font-size: 14px; font-weight: 720; }
+.formula-toast-copy span { color: #596579; font-size: 13px; line-height: 1.55; }
+.formula-toast-close { width: 30px; height: 30px; font-size: 23px; }
 @media (prefers-color-scheme: dark) {
   .formula-toast { border-color: #31528A; background: rgb(25 42 76 / 96%); color: #F5F8FF; box-shadow: 0 18px 55px rgb(0 0 0 / 34%); }
   .formula-toast-copy strong { color: #F5F8FF; }
