@@ -1134,7 +1134,8 @@ h1 { margin: 0; color: var(--ink); font-size: clamp(28px, 3vw, 37px); font-weigh
 
 /* Per-model extra material selector and recap rows. */
 .recap-model-heading { flex-wrap: wrap; }
-.recap-add-model-material { min-height: 30px; margin-left: auto; padding: 0 10px; font-size: 10px; white-space: nowrap; }
+.recap-model-actions { display: flex; flex: 0 0 auto; align-items: center; gap: 6px; margin-left: auto; }
+.recap-add-model-material { min-height: 30px; margin-left: 0; padding: 0 10px; font-size: 10px; white-space: nowrap; }
 .recap-extra-material-row > td { background: #FAFAFA; }
 .recap-extra-material-row .recap-selection-stack { min-width: 0; }
 .recap-extra-material-row .recap-quantity { min-width: 125px; }
@@ -1145,13 +1146,16 @@ h1 { margin: 0; color: var(--ink); font-size: clamp(28px, 3vw, 37px); font-weigh
 .recap-extra-modal-description { margin: 8px 0 18px; color: #737373; font-size: 12px; line-height: 1.55; }
 .recap-extra-modal-fields { display: grid; gap: 13px; }
 .recap-extra-modal-fields > label { display: grid; gap: 6px; color: #4B4B4B; font-size: 11px; font-weight: 600; }
-.recap-extra-modal-fields select, .recap-extra-modal-quantity input { box-sizing: border-box; width: 100%; min-height: 40px; padding: 0 11px; border: 1px solid #E3E3E3; border-radius: 7px; background: #FFF; color: #333; font: inherit; font-size: 12px; }
+.recap-extra-modal-fields select, .recap-extra-modal-fields input, .recap-extra-modal-quantity input { box-sizing: border-box; width: 100%; min-height: 40px; padding: 0 11px; border: 1px solid #E3E3E3; border-radius: 7px; background: #FFF; color: #333; font: inherit; font-size: 12px; }
 .recap-extra-modal-fields select:disabled { background: #F5F5F5; color: #AAA; }
-.recap-extra-modal-quantity { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 10px; }
+.recap-extra-modal-quantity { display: grid; width: 100%; box-sizing: border-box; grid-template-columns: minmax(0,1fr) 60px; align-items: center; gap: 10px; }
+.recap-extra-modal-quantity.recap-extra-modal-price { grid-template-columns: 36px minmax(0,1fr); }
+.recap-extra-modal-quantity > span { min-width: 0; }
 .recap-extra-modal-quantity > span { min-width: 60px; color: #777; font-size: 11px; }
 .recap-extra-price-preview { display: flex; justify-content: space-between; gap: 12px; margin-top: 16px; padding: 12px; border: 1px solid #EAEAEA; border-radius: 8px; background: #FAFAFA; color: #666; font-size: 10px; }
 .recap-extra-price-preview strong { color: #303030; font-size: 11px; text-align: right; }
-@media (max-width: 520px) { .recap-add-model-material { margin-left: 0; } .recap-extra-price-preview { flex-direction: column; } .recap-extra-price-preview strong { text-align: left; } }
+@media (max-width: 720px) { .recap-model-actions { margin-left: auto; flex-wrap: wrap; justify-content: flex-end; } .recap-model-heading { flex-wrap: wrap; } }
+@media (max-width: 520px) { .recap-model-actions { width: 100%; margin-left: 39px; justify-content: flex-start; } .recap-extra-price-preview { flex-direction: column; } .recap-extra-price-preview strong { text-align: left; } }
 
 
 /* Calculator workspace: compact model cards and a wider material recap. */
@@ -1833,3 +1837,13 @@ h1 { margin: 0; color: var(--ink); font-size: clamp(28px, 3vw, 37px); font-weigh
     box-shadow: none !important;
   }
 }
+
+
+/* Project-wide manual material entry. */
+.recap-heading-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.recap-heading-actions .primary-button { min-height: 34px; padding: 0 12px; font-size: 10px; white-space: nowrap; }
+.recap-manual-name { box-sizing: border-box; width: 100%; min-width: 120px; min-height: 34px; padding: 0 9px; border: 1px solid #E2E2E2; border-radius: 7px; background: #FFF; color: #252525; font: inherit; font-size: 11px; }
+.recap-manual-name:focus { outline: none; border-color: #777; box-shadow: 0 0 0 3px #F0F0F0; }
+.recap-legacy-extra-section .recap-table { min-width: 520px; }
+.recap-legacy-extra-section .price-field { min-width: 120px; }
+@media (max-width: 720px) { .recap-heading-actions { width: 100%; justify-content: space-between; } .recap-heading-actions .primary-button { flex: 1; } }
