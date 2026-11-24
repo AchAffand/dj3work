@@ -158,7 +158,7 @@ export function MaterialRecap({ rows, modelLines, total, budgetCatalogs, budgetD
   };
   return (
     <section className="recap-card">
-      {successMessage && <div className="recap-success-toast" role="status" aria-live="polite"><span className="recap-success-toast-icon" aria-hidden="true">✓</span><span>{successMessage}</span><button type="button" aria-label="Tutup notifikasi" onClick={() => setSuccessMessage("")}>×</button></div>}
+      {successMessage && <div className="formula-toast success" role="status" aria-live="polite"><span className="formula-toast-icon" aria-hidden="true">✓</span><div className="formula-toast-copy"><strong>Material berhasil ditambahkan</strong><span>{successMessage}</span></div><button className="formula-toast-close" type="button" aria-label="Tutup notifikasi" onClick={() => setSuccessMessage("")}>×</button></div>}
       <div className="recap-heading">
         <div><p className="eyebrow">RINGKASAN KEBUTUHAN</p><h2>Rekap material</h2></div>
         <span className="recap-count">{rows.length + extraMaterials.length} item</span>
