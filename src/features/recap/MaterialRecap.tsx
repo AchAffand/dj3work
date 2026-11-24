@@ -82,6 +82,10 @@ export function MaterialRecap({ rows, modelLines, total, budgetCatalogs, budgetD
   const [selectedVariantId, setSelectedVariantId] = useState("");
   const [quantityPerModel, setQuantityPerModel] = useState("1");
   const [selectedFormulaMaterialCode, setSelectedFormulaMaterialCode] = useState("");
+  const [manualModalOpen, setManualModalOpen] = useState(false);
+  const [manualName, setManualName] = useState("");
+  const [manualQuantity, setManualQuantity] = useState("1");
+  const [manualUnitPrice, setManualUnitPrice] = useState("");
   const missingPrices = rows.filter((row) => row.unitPrice === null).length
     + extraMaterials.filter((item) => item.unitPrice === null && item.componentId).length;
   const visibleExtraMaterials = extraMaterials.filter((item) =>
@@ -108,6 +112,18 @@ export function MaterialRecap({ rows, modelLines, total, budgetCatalogs, budgetD
     setSelectedCatalogId(""); setSelectedComponentId(""); setSelectedVariantId(""); setQuantityPerModel("1"); setSelectedFormulaMaterialCode("");
     setPendingModelId(modelLineId);
   };
+  const confirmAddManualMaterial = () => {
+    const name = manualName.trim();
+    const quantity = Number(manualQuantity);
+    const unitPrice = Number(manualUnitPrice);
+    if (!name || !Number.isFinite(quantity) || quantity <= 0 || !Number.isFinite(unitPrice) || unitPrice < 0) return;
+    onExtraMaterialsChange([...extraMaterials, {
+      id: createMaterialId(), modelLineId: null, formulaMaterialCode: null,
+      name, unit: "unit", quantity, catalogId: null, variantId: null, componentId: null,
+      unitPrice,
+    }]);
+    setManualName(""); setManualQuantity("1"); setManualUnitPrice(""); setManualModalOpen(false);
+  };
   const confirmAddMaterial = () => {
     if (!activeModelLine || !selectedCatalogDetail || !selectedComponent || !selectedVariantId) return;
     const quantity = selectedFormulaMaterial
@@ -129,7 +145,7 @@ export function MaterialRecap({ rows, modelLines, total, budgetCatalogs, budgetD
     <section className="recap-card">
       <div className="recap-heading">
         <div><p className="eyebrow">RINGKASAN KEBUTUHAN</p><h2>Rekap material</h2></div>
-        <span className="recap-count">{rows.length + extraMaterials.length} item</span>
+        <div className="recap-heading-actions"><span className="recap-count">{rows.length + extraMaterials.length} item</span><button className="primary-button" type="button" onClick={() => setManualModalOpen(true)}>＋ Tambah material manual</button></div>
       </div>
       {rows.length === 0 ? (
         <div className="recap-empty"><span className="recap-empty-mark">↗</span><strong>Rekap akan muncul di sini</strong><p>Pilih model dan isi ukuran untuk melihat total bahan.</p></div>
@@ -158,7 +174,7 @@ export function MaterialRecap({ rows, modelLines, total, budgetCatalogs, budgetD
 
                 return (
                   <Fragment key={`${row.modelIndex}-${row.materialCode}-${row.unit}-${row.priceKey}`}>
-                    {row.modelIndex !== previousRow?.modelIndex && <tr className="recap-model-divider"><td colSpan={5}><div className="recap-model-heading"><span className="recap-model-number">{String(row.modelIndex).padStart(2, "0")}</span><span className="recap-model-label">Model</span><span className="recap-model-name">- {row.modelCode ?? "—"} ({row.modelName ?? "Nama model tidak tersedia"})</span><span className="recap-model-rule" />{modelLine && <button className="secondary-button recap-add-model-material" type="button" onClick={() => openAddMaterial(modelLine.id)}>＋ Tambah material</button>}</div></td></tr>}
+                    {row.modelIndex !== previousRow?.modelIndex && <tr className="recap-model-divider"><td colSpan={5}><div className="recap-model-heading"><span className="recap-model-number">{String(row.modelIndex).padStart(2, "0")}</span><span className="recap-model-label">Model</span><span className="recap-model-name">- {row.modelCode ?? "—"} ({row.modelName ?? "Nama model tidak tersedia"})</span><span className="recap-model-rule" />{modelLine && <button className="secondary-button recap-add-model-material" type="button" onClick={() => openAddMaterial(modelLine.id)}>＋ Tambah dari katalog</button>}</div></td></tr>}
                     <tr>
                     <td><span className="recap-material-name">{displayMaterialName(row.name)}</span><small className="recap-material-code">{row.materialCode} · {row.unit}</small></td>
                     <td className="recap-quantity">{formatQuantity(row.quantity)} <span>{row.unit}</span></td>
@@ -354,23 +370,39 @@ export function MaterialRecap({ rows, modelLines, total, budgetCatalogs, budgetD
       )}
       {legacyExtraMaterials.length > 0 && (
         <section className="recap-extra-section recap-legacy-extra-section">
-          <div className="recap-heading"><div><p className="eyebrow">DATA PROYEK LAMA</p><h3>Material tambahan belum terkait model</h3></div></div>
+          <div className="recap-heading"><div><p className="eyebrow">INPUT MANUAL</p><h3>Material tambahan proyek</h3></div></div>
           <div className="recap-table-wrap"><table className="recap-table">
-            <thead><tr><th>Material</th><th>Qty tersimpan</th><th>Katalog / varian</th><th>Harga satuan</th><th>Subtotal</th></tr></thead>
+            <thead><tr><th>Nama item</th><th>Qty proyek</th><th>Harga satuan</th><th>Subtotal</th></tr></thead>
             <tbody>{legacyExtraMaterials.map((item) => {
-              const detail = item.catalogId ? budgetDetails.get(item.catalogId) : undefined;
-              const variant = detail?.variants.find((candidate) => candidate.id === item.variantId);
               const subtotal = item.unitPrice === null ? null : item.quantity * item.unitPrice;
+              const updateItem = (patch: Partial<ProjectExtraMaterial>) => onExtraMaterialsChange(extraMaterials.map((current) => current.id === item.id ? { ...current, ...patch } : current));
               return <tr key={item.id}>
-                <td>{item.name}<small className="recap-material-code">{item.unit}</small></td>
-                <td>{formatQuantity(item.quantity)} {item.unit}</td>
-                <td>{detail?.catalog.label ?? "—"} · {variant?.label ?? "—"}</td>
-                <td>{item.unitPrice === null ? "—" : formatRupiah(item.unitPrice)}</td>
+                <td><input aria-label={"Nama item " + item.name} type="text" value={item.name} onChange={(event) => updateItem({ name: event.target.value })} /></td>
+                <td><input aria-label={"Qty proyek " + item.name} type="number" min="0.0001" step="any" value={item.quantity} onChange={(event) => updateItem({ quantity: Math.max(0.0001, Number(event.target.value) || 0.0001) })} /></td>
+                <td><label className="price-field"><span className="price-prefix">Rp</span><input aria-label={"Harga satuan " + item.name} type="number" min="0" step="any" value={item.unitPrice ?? ""} onChange={(event) => updateItem({ unitPrice: event.target.value === "" ? null : Math.max(0, Number(event.target.value) || 0) })} /></label></td>
                 <td className="recap-subtotal">{subtotal === null ? "—" : formatRupiah(subtotal)} <button className="recap-extra-remove" type="button" aria-label={"Hapus " + item.name} onClick={() => onExtraMaterialsChange(extraMaterials.filter((current) => current.id !== item.id))}>×</button></td>
               </tr>;
             })}</tbody>
           </table></div>
         </section>
+      )}
+      {manualModalOpen && (
+        <div className="formula-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setManualModalOpen(false); }}>
+          <section className="formula-create-modal recap-extra-modal" role="dialog" aria-modal="true" aria-labelledby="manual-extra-title">
+            <p className="eyebrow">MATERIAL TAMBAHAN · INPUT MANUAL</p>
+            <h2 id="manual-extra-title">Tambah material untuk proyek</h2>
+            <p className="recap-extra-modal-description">Qty berlaku untuk seluruh proyek dan tidak dikalikan jumlah model.</p>
+            <div className="recap-extra-modal-fields">
+              <label><span>1. Nama Item</span><input autoFocus type="text" maxLength={120} placeholder="Contoh: Baut, sealant, ongkos pasang" value={manualName} onChange={(event) => setManualName(event.target.value)} /></label>
+              <label><span>2. Qty</span><input type="number" min="0.0001" step="any" placeholder="Masukkan jumlah total proyek" value={manualQuantity} onChange={(event) => setManualQuantity(event.target.value)} /></label>
+              <label><span>3. Harga Satuan</span><div className="recap-extra-modal-quantity"><span>Rp</span><input type="number" min="0" step="any" placeholder="Masukkan harga satuan" value={manualUnitPrice} onChange={(event) => setManualUnitPrice(event.target.value)} /></div></label>
+            </div>
+            <div className="formula-modal-actions formula-confirm-actions">
+              <button className="secondary-button" type="button" onClick={() => setManualModalOpen(false)}>Batal</button>
+              <button className="primary-button" type="button" disabled={!manualName.trim() || !Number.isFinite(Number(manualQuantity)) || Number(manualQuantity) <= 0 || manualUnitPrice === "" || !Number.isFinite(Number(manualUnitPrice)) || Number(manualUnitPrice) < 0} onClick={confirmAddManualMaterial}>Tambahkan</button>
+            </div>
+          </section>
+        </div>
       )}
       {pendingModelId && activeModelLine && (
         <div className="formula-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setPendingModelId(null); }}>
