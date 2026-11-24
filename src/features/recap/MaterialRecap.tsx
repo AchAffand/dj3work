@@ -87,7 +87,7 @@ export function MaterialRecap({ rows, modelLines, total, budgetCatalogs, budgetD
   const [manualQuantity, setManualQuantity] = useState("1");
   const [manualUnitPrice, setManualUnitPrice] = useState("");
   const missingPrices = rows.filter((row) => row.unitPrice === null).length
-    + extraMaterials.filter((item) => item.unitPrice === null && item.componentId).length;
+    + extraMaterials.filter((item) => item.unitPrice === null).length;
   const visibleExtraMaterials = extraMaterials.filter((item) =>
     !item.name.startsWith("__door_finish__:") && !item.name.startsWith("__formula_option__:"),
   );
@@ -377,8 +377,8 @@ export function MaterialRecap({ rows, modelLines, total, budgetCatalogs, budgetD
               const subtotal = item.unitPrice === null ? null : item.quantity * item.unitPrice;
               const updateItem = (patch: Partial<ProjectExtraMaterial>) => onExtraMaterialsChange(extraMaterials.map((current) => current.id === item.id ? { ...current, ...patch } : current));
               return <tr key={item.id}>
-                <td><input aria-label={"Nama item " + item.name} type="text" value={item.name} onChange={(event) => updateItem({ name: event.target.value })} /></td>
-                <td><input aria-label={"Qty proyek " + item.name} type="number" min="0.0001" step="any" value={item.quantity} onChange={(event) => updateItem({ quantity: Math.max(0.0001, Number(event.target.value) || 0.0001) })} /></td>
+                <td><input className="recap-manual-name" aria-label={"Nama item " + item.name} type="text" value={item.name} onChange={(event) => updateItem({ name: event.target.value })} /></td>
+                <td><input className="recap-extra-quantity" aria-label={"Qty proyek " + item.name} type="number" min="0.0001" step="any" value={item.quantity} onChange={(event) => updateItem({ quantity: Math.max(0.0001, Number(event.target.value) || 0.0001) })} /></td>
                 <td><label className="price-field"><span className="price-prefix">Rp</span><input aria-label={"Harga satuan " + item.name} type="number" min="0" step="any" value={item.unitPrice ?? ""} onChange={(event) => updateItem({ unitPrice: event.target.value === "" ? null : Math.max(0, Number(event.target.value) || 0) })} /></label></td>
                 <td className="recap-subtotal">{subtotal === null ? "—" : formatRupiah(subtotal)} <button className="recap-extra-remove" type="button" aria-label={"Hapus " + item.name} onClick={() => onExtraMaterialsChange(extraMaterials.filter((current) => current.id !== item.id))}>×</button></td>
               </tr>;
